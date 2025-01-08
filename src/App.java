@@ -14,5 +14,10 @@ public class App {
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        SpaceInvaders spaceInvaders = new SpaceInvaders();
+        frame.add(spaceInvaders);
+        frame.pack();
+        frame.setVisible(true);
     }
 }
