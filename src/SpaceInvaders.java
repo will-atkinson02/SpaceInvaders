@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.AppletInitializer;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
@@ -27,7 +26,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int tileSize = 32;
     int rows = 16;
     int cols = 16;
-    int boardHeight = tileSize *rows;
+    int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
 
     //ship
@@ -55,13 +54,19 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienRows = 2;
     int alienCols = 3;
     int alienCount = 0;
-    int alienVelocityX = 1;
+    int alienVelocityX = 50;
 
     //bullets
     ArrayList<Block> bulletArray;
     int bulletWidth = tileSize/8;
     int bulletHeight = tileSize/2;
     int bulletVelocityY = -10;
+
+    JPanel titleOverlay;
+    JPanel playAgainOverlay;
+
+    HighScore highScoreManager = new HighScore();
+    int highscore = highScoreManager.readHighScore();
 
     Timer gameLoop;
     int score = 0;
@@ -72,6 +77,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         setBackground(Color.black);
         setFocusable(true);
         addKeyListener(this);
+
+        initialiseTitleModalOverlay();
 
         //load images
         shipImg = new ImageIcon(getClass().getResource("./ship.png")).getImage();
@@ -93,7 +100,78 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //game timer
         gameLoop = new Timer(1000/60, this);
         createAliens();
-        gameLoop.start();
+
+        showModalOverlay(titleOverlay);
+    }
+
+    public void initialiseTitleModalOverlay() {
+        initialiseJPanel("SPACE INVADERS", "Play", true);
+    }
+
+    public void initialisePlayAgainOverlay() {
+        String text = "Score: " + Integer.toString(this.score);
+        initialiseJPanel(text, "Play again", false);
+    }
+
+    private void initialiseJPanel(String labelText, String buttonText, boolean isTitle) {
+        JPanel modal = new JPanel();
+        modal.setBackground(new Color(0, 0, 0, 200));
+        modal.setPreferredSize(new Dimension(boardWidth, boardHeight));
+        modal.setLayout(new GridBagLayout());
+
+        JLabel titleLabel = new JLabel(labelText);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        titleLabel.setForeground(Color.WHITE);
+
+        JButton startButton = new JButton(buttonText);
+        startButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        startButton.addActionListener(e -> handleButtonAction(buttonText, isTitle));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridy = 0;
+        modal.add(titleLabel, gbc);
+        gbc.gridy = 1;
+        modal.add(startButton, gbc);
+
+        // Assign to the class-level variable
+        if (isTitle) {
+            this.titleOverlay = modal;
+        } else {
+            this.playAgainOverlay = modal;
+        }
+    }
+
+    public void handleButtonAction(String buttonText, boolean isTitle) {
+        if (isTitle) {
+            removeModalOverlay(this.titleOverlay);
+            gameLoop.start();
+        } else {
+            removeModalOverlay(this.playAgainOverlay);
+            ship.x = shipX;
+            alienArray.clear();
+            bulletArray.clear();
+            score = 0;
+            alienVelocityX = 50;
+            alienCols = 3;
+            alienRows = 2;
+            createAliens();
+            gameLoop.start();
+            gameOver = false;
+        }
+    }
+
+    private void showModalOverlay(JPanel modal) {
+        add(modal);
+        repaint();
+        revalidate();
+    }
+
+    private void removeModalOverlay(JPanel modal) {
+        remove(modal);
+        repaint();
+        revalidate();
+        playAgainOverlay = null;
     }
 
     public void paintComponent(Graphics g) {
@@ -126,7 +204,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.PLAIN, 32));
         if (gameOver) {
-            g.drawString("Game Over: " + String.valueOf(score), 10, 35);
+            if (playAgainOverlay == null) {
+                if (score > highscore) {
+                    highScoreManager.writeHighScore(score);
+                }
+                initialisePlayAgainOverlay();
+                showModalOverlay(playAgainOverlay);
+            }
         } else {
             g.drawString(String.valueOf(score), 10, 35);
         }
@@ -232,19 +316,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (gameOver) {
-            ship.x = shipX;
-            alienArray.clear();
-            bulletArray.clear();
-            score = 0;
-            alienVelocityX = 1;
-            alienCols = 3;
-            alienRows = 2;
-            gameOver = false;
-            createAliens();
-            gameLoop.start();
-
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x > 0) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x > 0) {
             ship.x -= shipVelocityX;
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + shipWidth < boardWidth) {
             ship.x += shipVelocityX;
