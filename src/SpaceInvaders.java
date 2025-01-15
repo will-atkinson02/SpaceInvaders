@@ -54,7 +54,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienRows = 2;
     int alienCols = 3;
     int alienCount = 0;
-    int alienVelocityX = 50;
+    int alienVelocityX = 1;
 
     //bullets
     ArrayList<Block> bulletArray;
@@ -81,11 +81,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         initialiseTitleModalOverlay();
 
         //load images
-        shipImg = new ImageIcon(getClass().getResource("./ship.png")).getImage();
-        alienImg = new ImageIcon(getClass().getResource("./alien.png")).getImage();
-        alienCyanImage = new ImageIcon(getClass().getResource("./alien-cyan.png")).getImage();
-        alienMagentaImage = new ImageIcon(getClass().getResource("./alien-magenta.png")).getImage();
-        alienYellowImage = new ImageIcon(getClass().getResource("./alien-yellow.png")).getImage();
+        String spritesFolder = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/sprites/";
+        shipImg = new ImageIcon(getClass().getResource(spritesFolder + "ship.png")).getImage();
+        alienImg = new ImageIcon(getClass().getResource(spritesFolder + "alien.png")).getImage();
+        alienCyanImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-cyan.png")).getImage();
+        alienMagentaImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-magenta.png")).getImage();
+        alienYellowImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-yellow.png")).getImage();
 
         alienImgArray = new ArrayList<Image>();
         alienImgArray.add(alienImg);
@@ -166,7 +167,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienArray.clear();
             bulletArray.clear();
             score = 0;
-            alienVelocityX = 50;
+            alienVelocityX = 1;
             alienCols = 3;
             alienRows = 2;
             createAliens();
@@ -232,24 +233,44 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void move() {
         //aliens
+        boolean wallCollison = false;
         for (int i = 0; i < alienArray.size(); i++) {
             Block alien = alienArray.get(i);
             if (alien.alive) {
-                alien.x += alienVelocityX;
-
-                //if alien touches borders
-                if (alien.x + alienWidth >= boardWidth || alien.x <= 0) {
-                    alienVelocityX *= -1;
-                    alien.x += alienVelocityX*2;
-
-                    for (int j = 0; j < alienArray.size(); j++) {
-                        alienArray.get(j).y += tileSize;
-                    }
-                }
-
                 if (alien.y >= ship.y) {
                     gameOver = true;
                 }
+
+                //if alien touches borders
+                if (alien.x + alienWidth == boardWidth || alien.x == 0) {
+                    wallCollison = true;
+                    break;
+                }
+
+                
+            }
+        }
+
+        // If any alien hit the border, reverse the direction for all and move them down
+        if (wallCollison) {
+            alienVelocityX *= -1;
+
+            for (int i = 0; i < alienArray.size(); i++) {
+                Block alien = alienArray.get(i);
+                if (alien.alive) {
+                    alien.x += alienVelocityX*2;
+                    alien.y += tileSize;
+                }
+            }
+
+            wallCollison = false;
+        }
+        
+        // Update positions of all aliens that haven't hit the borders yet
+        for (int i = 0; i < alienArray.size(); i++) {
+            Block alien = alienArray.get(i);
+            if (alien.alive) {
+                alien.x += alienVelocityX;  
             }
         }
 

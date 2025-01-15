@@ -5,8 +5,8 @@ public class App {
         int tileSize = 36;
         int rows = 16;
         int cols = 16;
-        int boardHeight = tileSize * rows;
-        int boardWidth = tileSize * cols;
+        int boardHeight = tileSize*rows;
+        int boardWidth = tileSize*cols;
 
         JFrame frame = new JFrame("Space Invaders");
         frame.setVisible(true);
