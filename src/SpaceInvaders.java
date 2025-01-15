@@ -124,7 +124,21 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         titleLabel.setForeground(Color.WHITE);
 
         JButton startButton = new JButton(buttonText);
-        startButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        startButton.setFont(new Font("Arial", Font.PLAIN, 25));
+        startButton.setForeground(Color.white);
+        startButton.setBackground(new Color(40, 0, 128));
+        startButton.setMargin(new Insets(5, 10, 5, 10));
+        startButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                startButton.setBackground(new Color(80, 0, 255));
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                startButton.setBackground(new Color(40, 0, 128));
+            }
+        });
         startButton.addActionListener(e -> handleButtonAction(buttonText, isTitle));
 
         GridBagConstraints gbc = new GridBagConstraints();
