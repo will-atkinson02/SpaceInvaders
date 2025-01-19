@@ -10,16 +10,16 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         int y;
         int width;
         int height;
-        Image img;
+        ArrayList<Image> imgArray;
         boolean alive = true;
         boolean used = false;
 
-        Block(int x, int y, int width, int height, Image img) {
+        Block(int x, int y, int width, int height, ArrayList<Image> imgArray) {
             this.x = x;
             this.y = y; 
             this.width = width;
             this.height = height;
-            this.img = img;
+            this.imgArray = imgArray;
         }
     }
     //board
@@ -29,6 +29,22 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
 
+    //images
+    //ship images
+    ArrayList<Image> shipImgs;
+    Image shipImg;
+    
+    // Image alienCyanImage;
+    // Image alienMagentaImage;
+    // Image alienYellowImage;
+    //green alien images
+    ArrayList<ArrayList<Image>> alienImgsArray; 
+    ArrayList<Image> greenAlienImgs;
+    Image greenAlienA;
+    Image greenAlienB;
+
+    int spriteState = 0;
+
     //ship
     int shipWidth = tileSize*2;
     int shipHeight = tileSize;
@@ -36,13 +52,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int shipY = boardHeight - tileSize*2;
     int shipVelocityX = tileSize;
     Block ship;
-
-    Image shipImg;
-    Image alienImg;
-    Image alienCyanImage;
-    Image alienMagentaImage;
-    Image alienYellowImage;
-    ArrayList<Image> alienImgArray; 
 
     //aliens
     ArrayList<Block> alienArray;
@@ -69,6 +78,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int highscore = highScoreManager.readHighScore();
 
     Timer gameLoop;
+    int timerState = 0;
     int score = 0;
     boolean gameOver = false;
 
@@ -83,18 +93,25 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //load images
         String spritesFolder = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/sprites/";
         shipImg = new ImageIcon(getClass().getResource(spritesFolder + "ship.png")).getImage();
-        alienImg = new ImageIcon(getClass().getResource(spritesFolder + "alien.png")).getImage();
-        alienCyanImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-cyan.png")).getImage();
-        alienMagentaImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-magenta.png")).getImage();
-        alienYellowImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-yellow.png")).getImage();
+        greenAlienA = new ImageIcon(getClass().getResource(spritesFolder + "alienA.png")).getImage();
+        greenAlienB = new ImageIcon(getClass().getResource(spritesFolder + "alienB.png")).getImage();
+        // alienCyanImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-cyan.png")).getImage();
+        // alienMagentaImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-magenta.png")).getImage();
+        // alienYellowImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-yellow.png")).getImage();
 
-        alienImgArray = new ArrayList<Image>();
-        alienImgArray.add(alienImg);
-        alienImgArray.add(alienCyanImage);
-        alienImgArray.add(alienMagentaImage);
-        alienImgArray.add(alienYellowImage);
+        // shipImgArray
+        shipImgs = new ArrayList<Image>();
+        shipImgs.add(shipImg);
 
-        ship = new Block(shipX, shipY, shipWidth, shipHeight, shipImg);
+        greenAlienImgs = new ArrayList<Image>();
+        greenAlienImgs.add(greenAlienA);
+        greenAlienImgs.add(greenAlienB);
+        // alienImgArray.add(alienImg);
+        // alienImgArray.add(alienCyanImage);
+        // alienImgArray.add(alienMagentaImage);
+        // alienImgArray.add(alienYellowImage);
+
+        ship = new Block(shipX, shipY, shipWidth, shipHeight, shipImgs);
         alienArray = new ArrayList<Block>();
         bulletArray = new ArrayList<Block>();
 
@@ -149,7 +166,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         gbc.gridy = 1;
         modal.add(startButton, gbc);
 
-        // Assign to the class-level variable
         if (isTitle) {
             this.titleOverlay = modal;
         } else {
@@ -196,13 +212,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void draw(Graphics g) {
         //ship
-        g.drawImage(ship.img, ship.x, ship.y, ship.width, ship.height, null);
+        g.drawImage(ship.imgArray.get(0), ship.x, ship.y, ship.width, ship.height, null);
 
         //aliens
         for (int i = 0; i < alienArray.size(); i++) {
             Block alien = alienArray.get(i);
             if (alien.alive) {
-                g.drawImage(alien.img, alien.x, alien.y, alienWidth, alienHeight, null);
+                g.drawImage(alien.imgArray.get(spriteState), alien.x, alien.y, alienWidth, alienHeight, null);
             }
         }
 
@@ -246,8 +262,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                     wallCollison = true;
                     break;
                 }
-
-                
             }
         }
 
@@ -310,16 +324,16 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public void createAliens() {
-        Random random = new Random();
+        // Random random = new Random();
         for (int row = 0; row < alienRows; row++) {
             for (int col = 0; col < alienCols; col++) {
-                int randomImgIndex = random.nextInt(alienImgArray.size());
+                // int randomImgIndex = random.nextInt(alienImgsArray.size());
                 Block alien = new Block(
                     alienX + col*alienWidth,
                     alienY + row*alienHeight,
                     alienWidth,
                     alienHeight,
-                    alienImgArray.get(randomImgIndex)
+                    greenAlienImgs
                 );
                 alienArray.add(alien);
             }
@@ -336,6 +350,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        timerState++;
+        if (timerState == 30) {
+            spriteState = (spriteState == 0) ? 1 : 0;
+            timerState = 0;
+        }
+        System.out.println(spriteState);
         move();
         repaint();
         if (gameOver) {
