@@ -1,27 +1,10 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Random;
+//import java.util.Random;
 import javax.swing.*;
 
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
-    class Block {
-        int x;
-        int y;
-        int width;
-        int height;
-        ArrayList<Image> imgArray;
-        boolean alive = true;
-        boolean used = false;
-
-        Block(int x, int y, int width, int height, ArrayList<Image> imgArray) {
-            this.x = x;
-            this.y = y; 
-            this.width = width;
-            this.height = height;
-            this.imgArray = imgArray;
-        }
-    }
     //board
     int tileSize = 32;
     int rows = 16;
@@ -51,11 +34,11 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int shipX = (tileSize*cols)/2 - tileSize;
     int shipY = boardHeight - tileSize*2;
     int shipVelocityX = tileSize;
-    Block ship;
+    Entity ship;
 
     //aliens
-    ArrayList<Block> alienArray;
-    int alienWidth = tileSize*2;
+    ArrayList<Entity> alienArray;
+    int alienWidth = tileSize*11/8;
     int alienHeight = tileSize;
     int alienX = tileSize;
     int alienY = tileSize;
@@ -66,7 +49,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienVelocityX = 1;
 
     //bullets
-    ArrayList<Block> bulletArray;
+    ArrayList<Entity> bulletArray;
     int bulletWidth = tileSize/8;
     int bulletHeight = tileSize/2;
     int bulletVelocityY = -10;
@@ -111,9 +94,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         // alienImgArray.add(alienMagentaImage);
         // alienImgArray.add(alienYellowImage);
 
-        ship = new Block(shipX, shipY, shipWidth, shipHeight, shipImgs);
-        alienArray = new ArrayList<Block>();
-        bulletArray = new ArrayList<Block>();
+        ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs);
+        alienArray = new ArrayList<Entity>();
+        bulletArray = new ArrayList<Entity>();
 
         //game timer
         gameLoop = new Timer(1000/60, this);
@@ -216,7 +199,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         //aliens
         for (int i = 0; i < alienArray.size(); i++) {
-            Block alien = alienArray.get(i);
+            Entity alien = alienArray.get(i);
             if (alien.alive) {
                 g.drawImage(alien.imgArray.get(spriteState), alien.x, alien.y, alienWidth, alienHeight, null);
             }
@@ -225,7 +208,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //bullets
         g.setColor(Color.white);
         for (int i = 0; i < bulletArray.size(); i++) {
-            Block bullet = bulletArray.get(i);
+            Entity bullet = bulletArray.get(i);
             if (!bullet.used) {
                 g.fillRect(bullet.x, bullet.y, bulletWidth, bulletHeight);
             }
@@ -251,7 +234,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //aliens
         boolean wallCollison = false;
         for (int i = 0; i < alienArray.size(); i++) {
-            Block alien = alienArray.get(i);
+            Entity alien = alienArray.get(i);
             if (alien.alive) {
                 if (alien.y >= ship.y) {
                     gameOver = true;
@@ -270,7 +253,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienVelocityX *= -1;
 
             for (int i = 0; i < alienArray.size(); i++) {
-                Block alien = alienArray.get(i);
+                Entity alien = alienArray.get(i);
                 if (alien.alive) {
                     alien.x += alienVelocityX*2;
                     alien.y += tileSize;
@@ -282,7 +265,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         
         // Update positions of all aliens that haven't hit the borders yet
         for (int i = 0; i < alienArray.size(); i++) {
-            Block alien = alienArray.get(i);
+            Entity alien = alienArray.get(i);
             if (alien.alive) {
                 alien.x += alienVelocityX;  
             }
@@ -290,12 +273,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         //bullets
         for (int i = 0; i < bulletArray.size(); i++) {
-            Block bullet = bulletArray.get(i);
+            Entity bullet = bulletArray.get(i);
             bullet.y += bulletVelocityY;
 
             //bullet collision with aliens
             for (int j = 0; j < alienArray.size(); j++) {
-                Block alien = alienArray.get(j);
+                Entity alien = alienArray.get(j);
                 if (!bullet.used && alien.alive && detectCollision(bullet, alien)) {
                     bullet.used = true;
                     alien.alive = false;
@@ -328,9 +311,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         for (int row = 0; row < alienRows; row++) {
             for (int col = 0; col < alienCols; col++) {
                 // int randomImgIndex = random.nextInt(alienImgsArray.size());
-                Block alien = new Block(
-                    alienX + col*alienWidth,
-                    alienY + row*alienHeight,
+                Entity alien = new Entity(
+                    alienX + col*alienWidth*3/2,
+                    alienY + row*alienHeight*3/2,
                     alienWidth,
                     alienHeight,
                     greenAlienImgs
@@ -341,7 +324,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         alienCount = alienArray.size();
     }
 
-    public boolean detectCollision(Block a, Block b) {
+    public boolean detectCollision(Entity a, Entity b) {
         return a.x < b.x + b.width &&
                a.x + a.width > b.x &&
                a.y < b.y + b.height &&
@@ -376,7 +359,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + shipWidth < boardWidth) {
             ship.x += shipVelocityX;
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            Block bullet = new Block(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null);
+            Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null);
             bulletArray.add(bullet);
         }
     }
