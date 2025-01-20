@@ -3,8 +3,8 @@ public class App {
     public static void main(String[] args) throws Exception {
         // window
         int tileSize = 36;
-        int rows = 16;
-        int cols = 16;
+        int rows = 20;
+        int cols = 28;
         int boardHeight = tileSize*rows;
         int boardWidth = tileSize*cols;
 

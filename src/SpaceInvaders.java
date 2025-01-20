@@ -7,8 +7,8 @@ import javax.swing.*;
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
     //board
     int tileSize = 32;
-    int rows = 16;
-    int cols = 16;
+    int rows = 20;
+    int cols = 28;
     int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
 
@@ -43,10 +43,14 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienX = tileSize;
     int alienY = tileSize;
 
-    int alienRows = 2;
-    int alienCols = 3;
+    int alienRows = 5;
+    int alienCols = 11;
     int alienCount = 0;
-    int alienVelocityX = 1;
+    int alienSpeedX = 16;
+    int alienDirectionX = 1;
+    int alienVelocity = alienSpeedX*alienDirectionX;
+
+    int alienPosition = 0;
 
     //bullets
     ArrayList<Entity> bulletArray;
@@ -166,7 +170,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienArray.clear();
             bulletArray.clear();
             score = 0;
-            alienVelocityX = 1;
+            alienSpeedX = 10;
+            alienDirectionX = 10;
             alienCols = 3;
             alienRows = 2;
             createAliens();
@@ -241,7 +246,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 }
 
                 //if alien touches borders
-                if (alien.x + alienWidth == boardWidth || alien.x == 0) {
+                if (alien.x + alienWidth*3/2 >= boardWidth || alien.x <= alienWidth/2) {
                     wallCollison = true;
                     break;
                 }
@@ -250,12 +255,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         // If any alien hit the border, reverse the direction for all and move them down
         if (wallCollison) {
-            alienVelocityX *= -1;
+            alienDirectionX *= -1;
 
             for (int i = 0; i < alienArray.size(); i++) {
                 Entity alien = alienArray.get(i);
                 if (alien.alive) {
-                    alien.x += alienVelocityX*2;
+                    alien.x += alienVelocity*2;
                     alien.y += tileSize;
                 }
             }
@@ -264,12 +269,17 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         }
         
         // Update positions of all aliens that haven't hit the borders yet
-        for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
-            if (alien.alive) {
-                alien.x += alienVelocityX;  
+        if (alienPosition >= 30) {
+            for (int i = 0; i < alienArray.size(); i++) {
+                Entity alien = alienArray.get(i);
+                if (alien.alive) {
+                    System.out.println(alienPosition);
+                    alien.x += alienVelocity;  
+                }
             }
+            alienPosition = 0;
         }
+        
 
         //bullets
         for (int i = 0; i < bulletArray.size(); i++) {
@@ -301,7 +311,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienRows = Math.min(alienRows + 1, rows - 6);
             alienArray.clear();
             bulletArray.clear();
-            alienVelocityX = 1;
+            alienSpeedX = 10;
+            alienDirectionX = 1;
             createAliens();
         }
     }
@@ -312,8 +323,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int col = 0; col < alienCols; col++) {
                 // int randomImgIndex = random.nextInt(alienImgsArray.size());
                 Entity alien = new Entity(
-                    alienX + col*alienWidth*3/2,
-                    alienY + row*alienHeight*3/2,
+                    alienX + col*alienWidth,
+                    alienY + row*alienHeight,
                     alienWidth,
                     alienHeight,
                     greenAlienImgs
@@ -334,11 +345,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     @Override
     public void actionPerformed(ActionEvent e) {
         timerState++;
+        alienPosition++;
         if (timerState == 30) {
             spriteState = (spriteState == 0) ? 1 : 0;
             timerState = 0;
         }
-        System.out.println(spriteState);
+
         move();
         repaint();
         if (gameOver) {
