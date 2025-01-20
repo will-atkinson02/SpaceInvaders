@@ -46,9 +46,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienRows = 5;
     int alienCols = 11;
     int alienCount = 0;
-    int alienSpeedX = 16;
-    int alienDirectionX = 1;
-    int alienVelocity = alienSpeedX*alienDirectionX;
+    int alienVelocityX = 16;
+    // int alienDirectionX = 1;
+    // int alienVelocity = alienSpeedX*alienDirectionX;
 
     int alienPosition = 0;
 
@@ -170,8 +170,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienArray.clear();
             bulletArray.clear();
             score = 0;
-            alienSpeedX = 10;
-            alienDirectionX = 10;
+            alienVelocityX = 16;
+            // alienSpeedX = 10;
+            // alienDirectionX = 10;
             alienCols = 3;
             alienRows = 2;
             createAliens();
@@ -246,7 +247,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 }
 
                 //if alien touches borders
-                if (alien.x + alienWidth*3/2 >= boardWidth || alien.x <= alienWidth/2) {
+                if (alien.x + alienWidth*128/176 >= boardWidth || alien.x <= alienWidth*80/176) {
                     wallCollison = true;
                     break;
                 }
@@ -255,12 +256,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         // If any alien hit the border, reverse the direction for all and move them down
         if (wallCollison) {
-            alienDirectionX *= -1;
+            System.out.println(alienVelocityX);
+            alienVelocityX *= -1;
 
             for (int i = 0; i < alienArray.size(); i++) {
                 Entity alien = alienArray.get(i);
                 if (alien.alive) {
-                    alien.x += alienVelocity*2;
+                    alien.x += alienVelocityX*2;
                     alien.y += tileSize;
                 }
             }
@@ -274,7 +276,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 Entity alien = alienArray.get(i);
                 if (alien.alive) {
                     System.out.println(alienPosition);
-                    alien.x += alienVelocity;  
+                    alien.x += alienVelocityX;  
                 }
             }
             alienPosition = 0;
@@ -311,8 +313,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienRows = Math.min(alienRows + 1, rows - 6);
             alienArray.clear();
             bulletArray.clear();
-            alienSpeedX = 10;
-            alienDirectionX = 1;
+            alienVelocityX = 16;
+            // alienSpeedX = 10;
+            // alienDirectionX = 1;
             createAliens();
         }
     }
@@ -323,7 +326,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int col = 0; col < alienCols; col++) {
                 // int randomImgIndex = random.nextInt(alienImgsArray.size());
                 Entity alien = new Entity(
-                    alienX + col*alienWidth,
+                    alienX + col*alienWidth*16/11,
                     alienY + row*alienHeight,
                     alienWidth,
                     alienHeight,
