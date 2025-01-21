@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.util.ArrayList;
-//import java.util.Random;
 
 public class Entity {
     int x;
@@ -8,14 +7,16 @@ public class Entity {
     int width;
     int height;
     ArrayList<Image> imgArray;
+    double paddingRatio;
     boolean alive = true;
     boolean used = false;
 
-    Entity(int x, int y, int width, int height, ArrayList<Image> imgArray) {
+    Entity(int x, int y, int width, int height, ArrayList<Image> imgArray, double paddingRatio) {
         this.x = x;
         this.y = y; 
         this.width = width;
         this.height = height;
         this.imgArray = imgArray;
+        this.paddingRatio = paddingRatio;
     }
 }

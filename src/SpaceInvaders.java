@@ -13,18 +13,27 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int boardWidth = tileSize*cols;
 
     //images
-    //ship images
+    //ship
     ArrayList<Image> shipImgs;
     Image shipImg;
     
-    // Image alienCyanImage;
-    // Image alienMagentaImage;
-    // Image alienYellowImage;
-    //green alien images
+    //all alien images
     ArrayList<ArrayList<Image>> alienImgsArray; 
+
+    //crab 
     ArrayList<Image> greenAlienImgs;
     Image greenAlienA;
     Image greenAlienB;
+
+    //squid
+    ArrayList<Image> squidImgs;
+    Image squidA;
+    Image squidB;
+
+    //octopus
+    ArrayList<Image> octopusImgs;
+    Image octopusA;
+    Image octopusB;
 
     int spriteState = 0;
 
@@ -38,7 +47,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     //aliens
     ArrayList<Entity> alienArray;
-    int alienWidth = tileSize*11/8;
+    int alienWidth = tileSize*2;
     int alienHeight = tileSize;
     int alienX = tileSize;
     int alienY = tileSize;
@@ -46,7 +55,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienRows = 5;
     int alienCols = 11;
     int alienCount = 0;
-    int alienVelocityX = 16;
+    int alienVelocityX = 8;
     // int alienDirectionX = 1;
     // int alienVelocity = alienSpeedX*alienDirectionX;
 
@@ -82,23 +91,31 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         shipImg = new ImageIcon(getClass().getResource(spritesFolder + "ship.png")).getImage();
         greenAlienA = new ImageIcon(getClass().getResource(spritesFolder + "alienA.png")).getImage();
         greenAlienB = new ImageIcon(getClass().getResource(spritesFolder + "alienB.png")).getImage();
-        // alienCyanImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-cyan.png")).getImage();
-        // alienMagentaImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-magenta.png")).getImage();
-        // alienYellowImage = new ImageIcon(getClass().getResource(spritesFolder + "alien-yellow.png")).getImage();
+        squidA = new ImageIcon(getClass().getResource(spritesFolder + "squidA.png")).getImage();
+        squidB = new ImageIcon(getClass().getResource(spritesFolder + "squidB.png")).getImage();
+        octopusA = new ImageIcon(getClass().getResource(spritesFolder + "octopusA.png")).getImage();
+        octopusB = new ImageIcon(getClass().getResource(spritesFolder + "octopusB.png")).getImage();
 
         // shipImgArray
         shipImgs = new ArrayList<Image>();
         shipImgs.add(shipImg);
 
+        //crabs
         greenAlienImgs = new ArrayList<Image>();
         greenAlienImgs.add(greenAlienA);
         greenAlienImgs.add(greenAlienB);
-        // alienImgArray.add(alienImg);
-        // alienImgArray.add(alienCyanImage);
-        // alienImgArray.add(alienMagentaImage);
-        // alienImgArray.add(alienYellowImage);
 
-        ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs);
+        //squids
+        squidImgs = new ArrayList<Image>();
+        squidImgs.add(squidA);
+        squidImgs.add(squidB);
+        
+        //octopi
+        octopusImgs = new ArrayList<Image>();
+        octopusImgs.add(octopusA);
+        octopusImgs.add(octopusB);
+
+        ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs, 0.0);
         alienArray = new ArrayList<Entity>();
         bulletArray = new ArrayList<Entity>();
 
@@ -247,7 +264,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 }
 
                 //if alien touches borders
-                if (alien.x + alienWidth*128/176 >= boardWidth || alien.x <= alienWidth*80/176) {
+                if (alien.x + alienWidth == boardWidth || alien.x == 0) {
                     wallCollison = true;
                     break;
                 }
@@ -262,7 +279,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int i = 0; i < alienArray.size(); i++) {
                 Entity alien = alienArray.get(i);
                 if (alien.alive) {
-                    alien.x += alienVelocityX*2;
+                    alien.x += alienVelocityX;
                     alien.y += tileSize;
                 }
             }
@@ -321,17 +338,33 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public void createAliens() {
-        // Random random = new Random();
         for (int row = 0; row < alienRows; row++) {
             for (int col = 0; col < alienCols; col++) {
-                // int randomImgIndex = random.nextInt(alienImgsArray.size());
+                ArrayList<Image> imgSet;
+                double paddingRatio;
+
+                if (row < 1) {
+                    imgSet = squidImgs;
+                    paddingRatio = 0.5;
+                }
+                else if (row < 3) {
+                    imgSet = greenAlienImgs;
+                    paddingRatio = 0.6875;
+                } else {
+                    imgSet = octopusImgs;
+                    paddingRatio = 0.75;
+
+                }
+
                 Entity alien = new Entity(
-                    alienX + col*alienWidth*16/11,
-                    alienY + row*alienHeight,
-                    alienWidth,
-                    alienHeight,
-                    greenAlienImgs
-                );
+                        alienX + col*alienWidth,
+                        alienY + row*alienHeight*3/2,
+                        alienWidth,
+                        alienHeight,
+                        imgSet,
+                        paddingRatio
+                    );
+
                 alienArray.add(alien);
             }
         }
@@ -339,10 +372,23 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public boolean detectCollision(Entity a, Entity b) {
-        return a.x < b.x + b.width &&
-               a.x + a.width > b.x &&
-               a.y < b.y + b.height &&
-               a.y + a.height > b.y;
+        // Calculate the bounds for the inner 3/4 of entity 'a' (horizontal only)
+        int innerAx = a.x + a.width / 8;  // Shrink by 1/8 on the left
+        int innerAWidth = a.width * 3 / 4;  // Inner width is 3/4 of the original
+        int innerAy = a.y;                 // Keep full height (no restriction on top)
+        int innerAHeight = a.height;
+    
+        // Calculate the bounds for the inner 3/4 of entity 'b' (horizontal only)
+        int innerBx = b.x + b.width / 8;  // Shrink by 1/8 on the left
+        int innerBWidth = b.width * 3 / 4;  // Inner width is 3/4 of the original
+        int innerBy = b.y;                 // Keep full height (no restriction on top)
+        int innerBHeight = b.height;
+    
+        // Perform collision detection using the adjusted bounds
+        return innerAx < innerBx + innerBWidth &&
+               innerAx + innerAWidth > innerBx &&
+               innerAy < innerBy + innerBHeight &&
+               innerAy + innerAHeight > innerBy;
     }
 
     @Override
@@ -374,7 +420,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + shipWidth < boardWidth) {
             ship.x += shipVelocityX;
         } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null);
+            Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null, 0.0);
             bulletArray.add(bullet);
         }
     }
