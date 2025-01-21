@@ -55,10 +55,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienRows = 5;
     int alienCols = 11;
     int alienCount = 0;
-    int alienVelocityX = 8;
-    // int alienDirectionX = 1;
-    // int alienVelocity = alienSpeedX*alienDirectionX;
-
+    int alienVelocityX = 32;
     int alienPosition = 0;
 
     //bullets
@@ -75,6 +72,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     boolean wallCollison = false;
     boolean allowMove = true;
+    int tickRate = 30;
 
     Timer gameLoop;
     int timerState = 0;
@@ -187,14 +185,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         } else {
             removeModalOverlay(this.playAgainOverlay);
             ship.x = shipX;
-            alienArray.clear();
             bulletArray.clear();
             score = 0;
-            alienVelocityX = 16;
-            // alienSpeedX = 10;
-            // alienDirectionX = 10;
-            alienCols = 3;
-            alienRows = 2;
+            alienVelocityX = 8;
             createAliens();
             gameLoop.start();
             gameOver = false;
@@ -258,20 +251,16 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void move() {
         //aliens
-        if (alienPosition >= 30) {
+        if (alienPosition >= tickRate) {
             if (!wallCollison) {
                 for (int i = 0; i < alienArray.size(); i++) {
                     Entity alien = alienArray.get(i);
                     if (alien.alive) {
-                        //check if aliens are lower than ship
-                        if (alien.y >= ship.y) {
-                            gameOver = true;
-                        }
-        
                         //check if aliens are touching walls
                         if (alien.x + alienWidth == boardWidth || alien.x == 0) {
                             wallCollison = true;
                             allowMove = false;
+                            tickRate -= 2;
                             break;
                         }
                     }
@@ -284,7 +273,11 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 for (int i = 0; i < alienArray.size(); i++) {
                     Entity alien = alienArray.get(i);
                     if (alien.alive) {
-                        alien.y += tileSize;
+                        if (alien.y + tileSize == ship.y) {
+                            gameOver = true;
+                        } else {
+                            alien.y += tileSize;
+                        }
                     }
                 }
                 allowMove = true;
@@ -330,9 +323,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienRows = Math.min(alienRows + 1, rows - 6);
             alienArray.clear();
             bulletArray.clear();
-            alienVelocityX = 16;
-            // alienSpeedX = 10;
-            // alienDirectionX = 1;
+            alienVelocityX = 8;
             createAliens();
         }
     }
@@ -385,7 +376,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void actionPerformed(ActionEvent e) {
         timerState++;
         alienPosition++;
-        if (timerState == 30) {
+        if (timerState == tickRate) {
             spriteState = (spriteState == 0) ? 1 : 0;
             timerState = 0;
         }
@@ -394,6 +385,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         repaint();
         if (gameOver) {
             gameLoop.stop();
+            alienArray.clear();
+            repaint();
         }
     }
 
