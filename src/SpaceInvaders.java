@@ -74,6 +74,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int highscore = highScoreManager.readHighScore();
 
     boolean wallCollison = false;
+    boolean allowMove = true;
 
     Timer gameLoop;
     int timerState = 0;
@@ -257,47 +258,47 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void move() {
         //aliens
-        for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
-            if (alien.alive) {
-                if (alien.y >= ship.y) {
-                    gameOver = true;
-                }
-
-                //if alien touches borders
-                if (alien.x + alienWidth == boardWidth || alien.x == 0) {
-                    wallCollison = true;
-                    break;
-                }
-            }
-        }
-
-        // If any alien hit the border, reverse the direction for all and move them down
-        if (wallCollison) {
-            alienVelocityX *= -1;
-
-            for (int i = 0; i < alienArray.size(); i++) {
-                Entity alien = alienArray.get(i);
-                if (alien.alive) {
-                    alien.x += alienVelocityX;
-                    alien.y += tileSize;
-                }
-            }
-
-            wallCollison = false;
-        }
-        
-        // Update positions of all aliens that haven't hit the borders yet
         if (alienPosition >= 30) {
-            for (int i = 0; i < alienArray.size(); i++) {
-                Entity alien = alienArray.get(i);
-                if (alien.alive) {
-                    alien.x += alienVelocityX;  
+            if (!wallCollison) {
+                for (int i = 0; i < alienArray.size(); i++) {
+                    Entity alien = alienArray.get(i);
+                    if (alien.alive) {
+                        //check if aliens are lower than ship
+                        if (alien.y >= ship.y) {
+                            gameOver = true;
+                        }
+        
+                        //check if aliens are touching walls
+                        if (alien.x + alienWidth == boardWidth || alien.x == 0) {
+                            wallCollison = true;
+                            allowMove = false;
+                            break;
+                        }
+                    }
                 }
+            } 
+
+            if (!allowMove) {
+                alienVelocityX *= -1;
+
+                for (int i = 0; i < alienArray.size(); i++) {
+                    Entity alien = alienArray.get(i);
+                    if (alien.alive) {
+                        alien.y += tileSize;
+                    }
+                }
+                allowMove = true;
+            } else {
+                for (int i = 0; i < alienArray.size(); i++) {
+                    Entity alien = alienArray.get(i);
+                    if (alien.alive) {
+                        alien.x += alienVelocityX;  
+                    }
+                }
+                wallCollison = false;
             }
             alienPosition = 0;
         }
-        
 
         //bullets
         for (int i = 0; i < bulletArray.size(); i++) {
