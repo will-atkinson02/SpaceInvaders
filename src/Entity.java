@@ -19,4 +19,8 @@ public class Entity {
         this.imgArray = imgArray;
         this.paddingRatio = paddingRatio;
     }
+
+    public double getPaddingRatio() {
+        return paddingRatio;
+    }
 }

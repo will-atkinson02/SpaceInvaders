@@ -73,6 +73,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     HighScore highScoreManager = new HighScore();
     int highscore = highScoreManager.readHighScore();
 
+    boolean wallCollison = false;
+
     Timer gameLoop;
     int timerState = 0;
     int score = 0;
@@ -255,7 +257,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void move() {
         //aliens
-        boolean wallCollison = false;
         for (int i = 0; i < alienArray.size(); i++) {
             Entity alien = alienArray.get(i);
             if (alien.alive) {
@@ -273,7 +274,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         // If any alien hit the border, reverse the direction for all and move them down
         if (wallCollison) {
-            System.out.println(alienVelocityX);
             alienVelocityX *= -1;
 
             for (int i = 0; i < alienArray.size(); i++) {
@@ -292,7 +292,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int i = 0; i < alienArray.size(); i++) {
                 Entity alien = alienArray.get(i);
                 if (alien.alive) {
-                    System.out.println(alienPosition);
                     alien.x += alienVelocityX;  
                 }
             }
@@ -349,10 +348,10 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 }
                 else if (row < 3) {
                     imgSet = greenAlienImgs;
-                    paddingRatio = 0.6875;
+                    paddingRatio = 0.3125;
                 } else {
                     imgSet = octopusImgs;
-                    paddingRatio = 0.75;
+                    paddingRatio = 0.25;
 
                 }
 
@@ -372,23 +371,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public boolean detectCollision(Entity a, Entity b) {
-        // Calculate the bounds for the inner 3/4 of entity 'a' (horizontal only)
-        int innerAx = a.x + a.width / 8;  // Shrink by 1/8 on the left
-        int innerAWidth = a.width * 3 / 4;  // Inner width is 3/4 of the original
-        int innerAy = a.y;                 // Keep full height (no restriction on top)
-        int innerAHeight = a.height;
+        int innerBx = b.x + (int)(b.width*b.paddingRatio/2);
+        int innerBWidth = (int)(b.width*(1 - b.paddingRatio));
     
-        // Calculate the bounds for the inner 3/4 of entity 'b' (horizontal only)
-        int innerBx = b.x + b.width / 8;  // Shrink by 1/8 on the left
-        int innerBWidth = b.width * 3 / 4;  // Inner width is 3/4 of the original
-        int innerBy = b.y;                 // Keep full height (no restriction on top)
-        int innerBHeight = b.height;
-    
-        // Perform collision detection using the adjusted bounds
-        return innerAx < innerBx + innerBWidth &&
-               innerAx + innerAWidth > innerBx &&
-               innerAy < innerBy + innerBHeight &&
-               innerAy + innerAHeight > innerBy;
+        return a.x < innerBx + innerBWidth &&
+               a.x + a.width > innerBx &&
+               a.y < b.y + b.height &&
+               a.y + a.height > b.y;
     }
 
     @Override
