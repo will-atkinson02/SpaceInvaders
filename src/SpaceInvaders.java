@@ -1,13 +1,12 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-//import java.util.Random;
 import javax.swing.*;
 
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
     //board
     int tileSize = 32;
-    int rows = 22;
+    int rows = 24;
     int cols = 30;
     int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
@@ -43,7 +42,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int shipHeight = tileSize;
     int shipX = (tileSize*cols)/2 - tileSize;
     int shipY = boardHeight - tileSize*2;
-    int shipVelocityX = 8;
+    int shipVelocityX = 4;
     boolean movingLeft = false;
     boolean movingRight = false;
     Entity ship;
@@ -53,7 +52,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienWidth = tileSize*2;
     int alienHeight = tileSize;
     int alienX = tileSize*4;
-    int alienY = tileSize*3;
+    int alienY = tileSize*6;
 
     int alienRows = 5;
     int alienCols = 11;
@@ -75,6 +74,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     HighScore highScoreManager = new HighScore();
     int highscore = highScoreManager.readHighScore();
 
+    Font customFont = FontLoader.loadFont("PressStart2P-Regular.ttf");
+
     // movement
     boolean wallCollison = false;
     boolean allowMove = true;
@@ -87,6 +88,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     Timer gameLoop;
     int timerState = 0;
     int score = 0;
+    int lives = 3;
     boolean gameOver = false;
 
     SpaceInvaders() {
@@ -225,6 +227,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
+        g.drawLine(0, 75, 960, 75);
     }
 
     public void draw(Graphics g) {
@@ -257,7 +260,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         //score 
         g.setColor(Color.white);
-        g.setFont(new Font("Arial", Font.PLAIN, 32));
+        g.setFont(customFont);
         if (gameOver) {
             if (playAgainOverlay == null) {
                 if (score > highscore) {
@@ -267,7 +270,17 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 showModalOverlay(playAgainOverlay);
             }
         } else {
-            g.drawString(String.valueOf(score), 10, 35);
+
+            g.setFont(customFont);
+
+            g.drawString("Score:",30, 32);
+            g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 30, 62);
+            g.drawString("Highscore:",410, 32);
+            g.drawString("0".repeat(6 -  String.valueOf(highscore).length()) + String.valueOf(highscore), 435, 62);
+            g.drawString("Lives:", 825, 32);
+            for (int i = 0; i < lives; i++) {
+                g.drawImage(shipImg, 795 + shipWidth*3/4*i, 40, shipWidth*3/4, shipHeight*3/4, null);
+            }
         }
     }
 
@@ -334,16 +347,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         }
 
         //clear bullets
-        while (bulletArray.size() > 0 && (bulletArray.get(0).used || bulletArray.get(0).y < 0)) {
+        while (bulletArray.size() > 0 && (bulletArray.get(0).used || bulletArray.get(0).y < 75)) {
             bulletArray.remove(0); // stretch change bulletArray to a linked list
         }
 
         //next level
         if (alienCount == 0) {
             score += alienRows * alienCols * 100;
-
-            alienCols = Math.min(alienCols + 1, cols/2 - 2);
-            alienRows = Math.min(alienRows + 1, rows - 6);
             alienArray.clear();
             bulletArray.clear();
             alienVelocityX = 8;

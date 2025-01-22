@@ -1,0 +1,22 @@
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.File;
+import java.io.IOException;
+
+public class FontLoader {
+    public static Font loadFont(String fileName) {
+        String fontPath = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/fonts/";
+
+        try {
+            // Load the custom font
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, new File(fontPath + fileName));
+            // Derive the font with a specific size
+            return customFont.deriveFont(Font.PLAIN, 15);
+        } catch (FontFormatException e) {
+            System.err.println("Invalid font format: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading font file: " + e.getMessage());
+        }
+        return null; // Return null if the font couldn't be loaded
+    }
+}

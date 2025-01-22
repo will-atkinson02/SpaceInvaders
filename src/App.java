@@ -1,13 +1,14 @@
 import javax.swing.*;
+
 public class App {
     public static void main(String[] args) throws Exception {
         // window
         int tileSize = 36;
-        int rows = 20;
-        int cols = 28;
+        int rows = 22;
+        int cols = 30;
         int boardHeight = tileSize*rows;
         int boardWidth = tileSize*cols;
-
+        
         JFrame frame = new JFrame("Space Invaders");
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
