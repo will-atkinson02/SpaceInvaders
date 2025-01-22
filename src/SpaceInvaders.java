@@ -18,12 +18,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     Image shipImg;
     
     //all alien images
-    ArrayList<ArrayList<Image>> alienImgsArray; 
+    ArrayList<ArrayList<Image>> alienImgsArray;
+    Image alienExplosion;
 
     //crab 
-    ArrayList<Image> greenAlienImgs;
-    Image greenAlienA;
-    Image greenAlienB;
+    ArrayList<Image> crabImgs;
+    Image crabA;
+    Image crabB;
 
     //squid
     ArrayList<Image> squidImgs;
@@ -42,7 +43,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int shipHeight = tileSize;
     int shipX = (tileSize*cols)/2 - tileSize;
     int shipY = boardHeight - tileSize*2;
-    int shipVelocityX = tileSize;
+    int shipVelocityX = 8;
+    boolean movingLeft = false;
+    boolean movingRight = false;
     Entity ship;
 
     //aliens
@@ -62,17 +65,24 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     ArrayList<Entity> bulletArray;
     int bulletWidth = tileSize/8;
     int bulletHeight = tileSize/2;
-    int bulletVelocityY = -10;
+    int bulletVelocityY = -16;
 
+    //overlays
     JPanel titleOverlay;
     JPanel playAgainOverlay;
 
+    //highscore
     HighScore highScoreManager = new HighScore();
     int highscore = highScoreManager.readHighScore();
 
+    // movement
     boolean wallCollison = false;
     boolean allowMove = true;
     int tickRate = 30;
+    
+    // explosion duration
+    int recentlyExploded = -1;
+    int explosionDuration = 0;
 
     Timer gameLoop;
     int timerState = 0;
@@ -90,33 +100,37 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //load images
         String spritesFolder = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/sprites/";
         shipImg = new ImageIcon(getClass().getResource(spritesFolder + "ship.png")).getImage();
-        greenAlienA = new ImageIcon(getClass().getResource(spritesFolder + "alienA.png")).getImage();
-        greenAlienB = new ImageIcon(getClass().getResource(spritesFolder + "alienB.png")).getImage();
+        crabA = new ImageIcon(getClass().getResource(spritesFolder + "alienA.png")).getImage();
+        crabB = new ImageIcon(getClass().getResource(spritesFolder + "alienB.png")).getImage();
         squidA = new ImageIcon(getClass().getResource(spritesFolder + "squidA.png")).getImage();
         squidB = new ImageIcon(getClass().getResource(spritesFolder + "squidB.png")).getImage();
         octopusA = new ImageIcon(getClass().getResource(spritesFolder + "octopusA.png")).getImage();
         octopusB = new ImageIcon(getClass().getResource(spritesFolder + "octopusB.png")).getImage();
+        alienExplosion = new ImageIcon(getClass().getResource(spritesFolder + "alien-explosion.png")).getImage();
 
         // shipImgArray
         shipImgs = new ArrayList<Image>();
         shipImgs.add(shipImg);
 
         //crabs
-        greenAlienImgs = new ArrayList<Image>();
-        greenAlienImgs.add(greenAlienA);
-        greenAlienImgs.add(greenAlienB);
+        crabImgs = new ArrayList<Image>();
+        crabImgs.add(crabA);
+        crabImgs.add(crabB);
+        crabImgs.add(alienExplosion);
 
         //squids
         squidImgs = new ArrayList<Image>();
         squidImgs.add(squidA);
         squidImgs.add(squidB);
+        squidImgs.add(alienExplosion);
         
         //octopi
         octopusImgs = new ArrayList<Image>();
         octopusImgs.add(octopusA);
         octopusImgs.add(octopusB);
+        octopusImgs.add(alienExplosion);
 
-        ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs, 0.0);
+        ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs, 0.0, 0);
         alienArray = new ArrayList<Entity>();
         bulletArray = new ArrayList<Entity>();
 
@@ -187,7 +201,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             ship.x = shipX;
             bulletArray.clear();
             score = 0;
-            alienVelocityX = 8;
+            alienVelocityX = 32;
+            timerState = 0;
             createAliens();
             gameLoop.start();
             gameOver = false;
@@ -219,7 +234,14 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //aliens
         for (int i = 0; i < alienArray.size(); i++) {
             Entity alien = alienArray.get(i);
-            if (alien.alive) {
+            if (i == recentlyExploded) {
+                g.drawImage(alien.imgArray.get(2), alien.x, alien.y, alienWidth, alienHeight, null);
+                if (explosionDuration == 5) {
+                    recentlyExploded = -1;
+                    explosionDuration = 0;
+                }
+            }
+            else if (alien.alive) {
                 g.drawImage(alien.imgArray.get(spriteState), alien.x, alien.y, alienWidth, alienHeight, null);
             }
         }
@@ -302,10 +324,11 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int j = 0; j < alienArray.size(); j++) {
                 Entity alien = alienArray.get(j);
                 if (!bullet.used && alien.alive && detectCollision(bullet, alien)) {
+                    recentlyExploded = j;
                     bullet.used = true;
                     alien.alive = false;
                     alienCount--;
-                    score += 100;
+                    score += alien.points;
                 }
             }
         }
@@ -324,6 +347,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienArray.clear();
             bulletArray.clear();
             alienVelocityX = 8;
+            timerState = 0;
             createAliens();
         }
     }
@@ -333,18 +357,21 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int col = 0; col < alienCols; col++) {
                 ArrayList<Image> imgSet;
                 double paddingRatio;
+                int points; 
 
                 if (row < 1) {
                     imgSet = squidImgs;
                     paddingRatio = 0.5;
+                    points = 30;
                 }
                 else if (row < 3) {
-                    imgSet = greenAlienImgs;
+                    imgSet = crabImgs;
                     paddingRatio = 0.3125;
+                    points = 20;
                 } else {
                     imgSet = octopusImgs;
                     paddingRatio = 0.25;
-
+                    points = 10;
                 }
 
                 Entity alien = new Entity(
@@ -353,7 +380,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                         alienWidth,
                         alienHeight,
                         imgSet,
-                        paddingRatio
+                        paddingRatio,
+                        points
                     );
 
                 alienArray.add(alien);
@@ -376,9 +404,21 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void actionPerformed(ActionEvent e) {
         timerState++;
         alienPosition++;
+        
         if (timerState == tickRate) {
             spriteState = (spriteState == 0) ? 1 : 0;
             timerState = 0;
+        }
+
+        if (recentlyExploded >= 0) {
+            explosionDuration++;
+        }
+
+        // Update ship's position based on key press flags
+        if (movingLeft) {
+            ship.x -= shipVelocityX;
+        } else if (movingRight) {
+            ship.x += shipVelocityX;
         }
 
         move();
@@ -394,16 +434,24 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void keyTyped(KeyEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x > 0) {
+            movingLeft = true;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + shipWidth < boardWidth) {
+            movingRight = true;
+        }
+    }
 
     @Override
     public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_LEFT && ship.x > 0) {
-            ship.x -= shipVelocityX;
+            movingLeft = false;
         } else if (e.getKeyCode() == KeyEvent.VK_RIGHT && ship.x + shipWidth < boardWidth) {
-            ship.x += shipVelocityX;
-        } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null, 0.0);
+            movingRight = false;
+        }
+
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null, 0.0, 0);
             bulletArray.add(bullet);
         }
     }
