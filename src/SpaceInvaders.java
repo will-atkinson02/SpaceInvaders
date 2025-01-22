@@ -7,8 +7,8 @@ import javax.swing.*;
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
     //board
     int tileSize = 32;
-    int rows = 20;
-    int cols = 28;
+    int rows = 22;
+    int cols = 30;
     int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
 
@@ -52,13 +52,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     ArrayList<Entity> alienArray;
     int alienWidth = tileSize*2;
     int alienHeight = tileSize;
-    int alienX = tileSize;
-    int alienY = tileSize;
+    int alienX = tileSize*4;
+    int alienY = tileSize*3;
 
     int alienRows = 5;
     int alienCols = 11;
     int alienCount = 0;
-    int alienVelocityX = 32;
+    int alienVelocityX = 16;
     int alienPosition = 0;
 
     //bullets
@@ -78,7 +78,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     // movement
     boolean wallCollison = false;
     boolean allowMove = true;
-    int tickRate = 30;
+    int tickRate = 24;
     
     // explosion duration
     int recentlyExploded = -1;
@@ -236,7 +236,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             Entity alien = alienArray.get(i);
             if (i == recentlyExploded) {
                 g.drawImage(alien.imgArray.get(2), alien.x, alien.y, alienWidth, alienHeight, null);
-                if (explosionDuration == 5) {
+                if (explosionDuration == 2) {
                     recentlyExploded = -1;
                     explosionDuration = 0;
                 }
