@@ -6,7 +6,7 @@ import javax.swing.*;
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
     //board
     int tileSize = 32;
-    int rows = 24;
+    int rows = 22;
     int cols = 30;
     int boardHeight = tileSize*rows;
     int boardWidth = tileSize*cols;
@@ -37,14 +37,20 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     int spriteState = 0;
 
+    //ufo
+    ArrayList<Image> ufoImgs;
+    Image ufoImg;
+    int ufoCount = 0;
+
     //ship
     int shipWidth = tileSize*2;
     int shipHeight = tileSize;
     int shipX = (tileSize*cols)/2 - tileSize;
     int shipY = boardHeight - tileSize*2;
-    int shipVelocityX = 4;
+    int shipVelocityX = 8;
     boolean movingLeft = false;
     boolean movingRight = false;
+    int reloadTime = 30;
     Entity ship;
 
     //aliens
@@ -52,13 +58,21 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienWidth = tileSize*2;
     int alienHeight = tileSize;
     int alienX = tileSize*4;
-    int alienY = tileSize*6;
+    int alienY = tileSize*5;
 
     int alienRows = 5;
     int alienCols = 11;
     int alienCount = 0;
-    int alienVelocityX = 16;
+    int alienVelocityX = 8;
     int alienPosition = 0;
+
+    //ufo entity
+    Entity ufoEntity = null;
+    int ufoX;
+    int ufoY = tileSize*4;
+    int ufoVelocityX = 4;
+    boolean ufoHit = false;
+    boolean allowUFOs = false;
 
     //bullets
     ArrayList<Entity> bulletArray;
@@ -109,6 +123,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         octopusA = new ImageIcon(getClass().getResource(spritesFolder + "octopusA.png")).getImage();
         octopusB = new ImageIcon(getClass().getResource(spritesFolder + "octopusB.png")).getImage();
         alienExplosion = new ImageIcon(getClass().getResource(spritesFolder + "alien-explosion.png")).getImage();
+        ufoImg = new ImageIcon(getClass().getResource(spritesFolder + "ufo.png")).getImage();
 
         // shipImgArray
         shipImgs = new ArrayList<Image>();
@@ -131,6 +146,10 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         octopusImgs.add(octopusA);
         octopusImgs.add(octopusB);
         octopusImgs.add(alienExplosion);
+
+        //ufo 
+        ufoImgs = new ArrayList<Image>();
+        ufoImgs.add(ufoImg);
 
         ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs, 0.0, 0);
         alienArray = new ArrayList<Entity>();
@@ -159,14 +178,14 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         modal.setLayout(new GridBagLayout());
 
         JLabel titleLabel = new JLabel(labelText);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        titleLabel.setFont(FontLoader.customiseFont(customFont, 0, 36));
         titleLabel.setForeground(Color.WHITE);
 
         JButton startButton = new JButton(buttonText);
-        startButton.setFont(new Font("Arial", Font.PLAIN, 25));
+        startButton.setFont(FontLoader.customiseFont(customFont, 0, 24));
         startButton.setForeground(Color.white);
-        startButton.setBackground(new Color(40, 0, 128));
-        startButton.setMargin(new Insets(5, 10, 5, 10));
+        startButton.setBackground(new Color(0, 128, 0));
+        startButton.setMargin(new Insets(20, 10, 20, 10));
         startButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
@@ -249,6 +268,25 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
         }
 
+        //ufo
+        if (ufoEntity != null) {
+            if (ufoHit) {
+                System.out.println("this is the one");
+                g.setFont(FontLoader.customiseFont(customFont, 0, 18));
+                if (explosionDuration < 20) {
+                    g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x, ufoEntity.y);
+                } else if (explosionDuration >= 20) {
+                    ufoVelocityX = 4;
+                    ufoHit = false;
+                    ufoEntity = null;
+                    explosionDuration = 0;
+                    ufoCount = 0;
+                }
+            } else {
+                g.drawImage(ufoImg, ufoEntity.x, ufoEntity.y, alienWidth, alienHeight, null);
+            }
+        } 
+
         //bullets
         g.setColor(Color.white);
         for (int i = 0; i < bulletArray.size(); i++) {
@@ -271,15 +309,15 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
         } else {
 
-            g.setFont(customFont);
+            g.setFont(FontLoader.customiseFont(customFont, 0, 18));
 
-            g.drawString("Score:",30, 32);
-            g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 30, 62);
-            g.drawString("Highscore:",410, 32);
-            g.drawString("0".repeat(6 -  String.valueOf(highscore).length()) + String.valueOf(highscore), 435, 62);
-            g.drawString("Lives:", 825, 32);
+            g.drawString("Score:",130, 32);
+            g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 130, 62);
+            g.drawString("Highscore:",390, 32);
+            g.drawString("0".repeat(6 -  String.valueOf(highscore).length()) + String.valueOf(highscore), 425, 62);
+            g.drawString("Lives:", 725, 32);
             for (int i = 0; i < lives; i++) {
-                g.drawImage(shipImg, 795 + shipWidth*3/4*i, 40, shipWidth*3/4, shipHeight*3/4, null);
+                g.drawImage(shipImg, 705 + shipWidth*3/4*i, 40, shipWidth*3/4, shipHeight*3/4, null);
             }
         }
     }
@@ -312,6 +350,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                             gameOver = true;
                         } else {
                             alien.y += tileSize;
+                            if (alien.y == tileSize*6 && !allowUFOs) {
+                                allowUFOs = true;
+                            }
                         }
                     }
                 }
@@ -327,6 +368,30 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
             alienPosition = 0;
         }
+        
+        //ufo
+        if (allowUFOs) {
+            if (ufoEntity == null) {
+                if (ufoCount == 120) {
+                    double randomNumber = Math.random();
+                    int points = ufoPoints();
+                    if (randomNumber > 0.75 || randomNumber < 0.25) {
+                        createUFO(randomNumber, points);
+                    }
+                    ufoCount = 0;
+                    System.out.println("hey");
+                }
+            } else if (ufoEntity != null) {
+                ufoEntity.x += ufoVelocityX;
+                if (ufoVelocityX > 0 && ufoEntity.x == boardWidth) {
+                    ufoEntity = null;
+                } else if (ufoVelocityX < 0 && ufoEntity.x == -tileSize*2) {
+                    ufoEntity = null;
+                }
+            }
+        }
+        
+        
 
         //bullets
         for (int i = 0; i < bulletArray.size(); i++) {
@@ -337,12 +402,22 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             for (int j = 0; j < alienArray.size(); j++) {
                 Entity alien = alienArray.get(j);
                 if (!bullet.used && alien.alive && detectCollision(bullet, alien)) {
+                    reloadTime = 30;
                     recentlyExploded = j;
                     bullet.used = true;
                     alien.alive = false;
                     alienCount--;
                     score += alien.points;
                 }
+            }
+
+            //bullet collision with ufo
+            if (ufoEntity != null && detectCollision(bullet, ufoEntity)) {
+                bullet.used = true;
+                reloadTime = 30;
+                score += ufoEntity.points;
+                ufoHit = true;
+                ufoVelocityX = 0;
             }
         }
 
@@ -356,7 +431,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             score += alienRows * alienCols * 100;
             alienArray.clear();
             bulletArray.clear();
-            alienVelocityX = 8;
+            alienVelocityX += 4;
             timerState = 0;
             createAliens();
         }
@@ -400,6 +475,30 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         alienCount = alienArray.size();
     }
 
+    public void createUFO(double randomNumber, int points) {
+        if (randomNumber > 0.75) {
+            if (ufoVelocityX > 0) {
+                ufoVelocityX *= -1;
+            }
+            ufoX = boardWidth;
+            ufoEntity = new Entity(ufoX, ufoY, alienWidth, alienHeight, ufoImgs, 0, points);
+
+        } else if (randomNumber < 0.25) {
+            if (ufoVelocityX < 0) {
+                ufoVelocityX *= -1;
+            }
+            ufoX = -tileSize*2;
+            ufoEntity = new Entity(ufoX, ufoY, alienWidth, alienHeight, ufoImgs, 0, points);
+        }
+    }
+
+    public int ufoPoints() {
+        int rand = (int) Math.random()*9;
+        int points = 100 + rand*50;
+        System.out.println(points);
+        return points;
+    }
+
     public boolean detectCollision(Entity a, Entity b) {
         int innerBx = b.x + (int)(b.width*b.paddingRatio/2);
         int innerBWidth = (int)(b.width*(1 - b.paddingRatio));
@@ -414,6 +513,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void actionPerformed(ActionEvent e) {
         timerState++;
         alienPosition++;
+        if (reloadTime < 30) {
+            reloadTime++;
+        }
         
         if (timerState == tickRate) {
             spriteState = (spriteState == 0) ? 1 : 0;
@@ -424,10 +526,18 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             explosionDuration++;
         }
 
+        if (ufoEntity == null && allowUFOs) {
+            ufoCount++;
+        }
+
+        if (ufoHit) {
+            explosionDuration++;
+        }
+
         // Update ship's position based on key press flags
-        if (movingLeft) {
+        if (movingLeft && ship.x > shipVelocityX) {
             ship.x -= shipVelocityX;
-        } else if (movingRight) {
+        } else if (movingRight && ship.x < boardWidth - shipWidth - shipVelocityX) {
             ship.x += shipVelocityX;
         }
 
@@ -462,7 +572,10 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             Entity bullet = new Entity(ship.x + shipWidth*15/32, ship.y, bulletWidth, boardHeight, null, 0.0, 0);
-            bulletArray.add(bullet);
+            if (reloadTime == 30) {
+                bulletArray.add(bullet);
+                reloadTime = 0;
+            }
         }
     }
 }
