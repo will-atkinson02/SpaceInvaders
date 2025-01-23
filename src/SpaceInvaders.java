@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.*;
 
 public class SpaceInvaders extends JPanel implements ActionListener, KeyListener {
@@ -12,37 +13,28 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int boardWidth = tileSize*cols;
 
     //images
-    //ship
-    ArrayList<Image> shipImgs;
-    Image shipImg;
-    
-    //all alien images
     ArrayList<ArrayList<Image>> alienImgsArray;
     Image alienExplosion;
 
-    //crab 
     ArrayList<Image> crabImgs;
     Image crabA;
     Image crabB;
 
-    //squid
     ArrayList<Image> squidImgs;
     Image squidA;
     Image squidB;
 
-    //octopus
     ArrayList<Image> octopusImgs;
     Image octopusA;
     Image octopusB;
 
-    int spriteState = 0;
-
-    //ufo
     ArrayList<Image> ufoImgs;
     Image ufoImg;
-    int ufoCount = 0;
 
-    //ship
+    ArrayList<Image> shipImgs;
+    Image shipImg;
+
+    //properties
     int shipWidth = tileSize*2;
     int shipHeight = tileSize;
     int shipX = (tileSize*cols)/2 - tileSize;
@@ -53,20 +45,17 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int reloadTime = 30;
     Entity ship;
 
-    //aliens
     ArrayList<Entity> alienArray;
+    int alienRows = 5;
+    int alienCols = 11;
+    int alienCount = 0;
+    
     int alienWidth = tileSize*2;
     int alienHeight = tileSize;
     int alienX = tileSize*4;
     int alienY = tileSize*5;
-
-    int alienRows = 5;
-    int alienCols = 11;
-    int alienCount = 0;
     int alienVelocityX = 8;
-    int alienPosition = 0;
 
-    //ufo entity
     Entity ufoEntity = null;
     int ufoX;
     int ufoY = tileSize*4;
@@ -74,36 +63,37 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     boolean ufoHit = false;
     boolean allowUFOs = false;
 
-    //bullets
     ArrayList<Entity> bulletArray;
     int bulletWidth = tileSize/8;
     int bulletHeight = tileSize/2;
     int bulletVelocityY = -16;
 
-    //overlays
-    JPanel titleOverlay;
-    JPanel playAgainOverlay;
-
-    //highscore
-    HighScore highScoreManager = new HighScore();
-    int highscore = highScoreManager.readHighScore();
-
-    Font customFont = FontLoader.loadFont("PressStart2P-Regular.ttf");
-
-    // movement
+    //states
     boolean wallCollison = false;
     boolean allowMove = true;
+
     int tickRate = 24;
-    
-    // explosion duration
+    int spriteState = 0;
+    int timerState = 0;
+    int ufoCount = 0;
+    int alienPosition = 0;
+
     int recentlyExploded = -1;
     int explosionDuration = 0;
 
     Timer gameLoop;
-    int timerState = 0;
     int score = 0;
     int lives = 3;
     boolean gameOver = false;
+
+    //miscellaneous
+    JPanel titleOverlay;
+    JPanel playAgainOverlay;
+
+    HighScore highScoreManager = new HighScore();
+    int highscore = highScoreManager.readHighScore();
+
+    Font customFont = FontLoader.loadFont("PressStart2P-Regular.ttf");
 
     SpaceInvaders() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -125,40 +115,38 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         alienExplosion = new ImageIcon(getClass().getResource(spritesFolder + "alien-explosion.png")).getImage();
         ufoImg = new ImageIcon(getClass().getResource(spritesFolder + "ufo.png")).getImage();
 
-        // shipImgArray
+        //create image arrays
         shipImgs = new ArrayList<Image>();
         shipImgs.add(shipImg);
 
-        //crabs
         crabImgs = new ArrayList<Image>();
         crabImgs.add(crabA);
         crabImgs.add(crabB);
         crabImgs.add(alienExplosion);
 
-        //squids
         squidImgs = new ArrayList<Image>();
         squidImgs.add(squidA);
         squidImgs.add(squidB);
         squidImgs.add(alienExplosion);
         
-        //octopi
         octopusImgs = new ArrayList<Image>();
         octopusImgs.add(octopusA);
         octopusImgs.add(octopusB);
         octopusImgs.add(alienExplosion);
 
-        //ufo 
         ufoImgs = new ArrayList<Image>();
         ufoImgs.add(ufoImg);
 
+        //initalise entities
         ship = new Entity(shipX, shipY, shipWidth, shipHeight, shipImgs, 0.0, 0);
+
         alienArray = new ArrayList<Entity>();
         bulletArray = new ArrayList<Entity>();
 
-        //game timer
-        gameLoop = new Timer(1000/60, this);
         createAliens();
 
+
+        gameLoop = new Timer(1000/60, this);
         showModalOverlay(titleOverlay);
     }
 
@@ -271,7 +259,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //ufo
         if (ufoEntity != null) {
             if (ufoHit) {
-                System.out.println("this is the one");
                 g.setFont(FontLoader.customiseFont(customFont, 0, 18));
                 if (explosionDuration < 20) {
                     g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x, ufoEntity.y);
@@ -379,7 +366,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                         createUFO(randomNumber, points);
                     }
                     ufoCount = 0;
-                    System.out.println("hey");
                 }
             } else if (ufoEntity != null) {
                 ufoEntity.x += ufoVelocityX;
@@ -493,9 +479,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public int ufoPoints() {
-        int rand = (int) Math.random()*9;
-        int points = 100 + rand*50;
-        System.out.println(points);
+        Random r = new Random();
+        int randomInteger = r.nextInt(450) + 1;
+        int points = 50 + (randomInteger/50)*50;
         return points;
     }
 
