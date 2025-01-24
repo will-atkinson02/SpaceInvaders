@@ -59,7 +59,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienX = tileSize*4;
     int alienY = tileSize*5; 
     int alienVelocityX = 8;
-    int currentAlienVelocity;
 
     Entity ufoEntity = null;
     int ufoX;
@@ -252,7 +251,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienArray.clear();
             bulletArray.clear();
             score = 0;
-            alienVelocityX = 32;
+            alienVelocityX = 8;
             timerState = 0;
             shipSpriteState = 0;
             lives = 3;
@@ -362,7 +361,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void move() {
         //aliens
-        if (alienPosition >= tickRate) {
+        if (alienPosition >= tickRate && !shipHit) {
             if (!wallCollison) {
                 for (int i = 0; i < alienArray.size(); i++) {
                     Entity alien = alienArray.get(i);
@@ -569,6 +568,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        System.out.println(alienVelocityX);
+
         zigzagAnimationTimer++;
         if (zigzagAnimationTimer == zigzagAnimationInterval) {
             moveFirstToEnd(zigzagConvolution);
@@ -587,17 +588,10 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
         }
 
-        timerState++;
-        alienPosition++;
         if (reloadTime < 30) {
             reloadTime++;
         }
         
-        if (timerState == tickRate) {
-            alienSpriteState = (alienSpriteState == 0) ? 1 : 0;
-            timerState = 0;
-        }
-
         if (recentlyExploded >= 0) {
             explosionDuration++;
         }
@@ -611,24 +605,28 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         }
 
         if (shipHit) {
-            currentAlienVelocity = alienVelocityX;
-            alienVelocityX = 0;
             shipTimer++;
             
             if (shipTimer % 5 == 0) {
                 shipSpriteState = (shipSpriteState == 1) ? 2 : 1;
             }
 
-            if (shipTimer == 30) {
+            if (shipTimer == 50) {
                 if (lives == 0) {
                     gameOver = true;
                     shipHit = false;
                 } else {
-                    alienVelocityX = currentAlienVelocity;
                     shipHit = false;
                     shipSpriteState = 0;
                 }
                 shipTimer = 0;
+            }
+        } else {
+            alienPosition++;
+            timerState++;
+            if (timerState == tickRate) {
+                alienSpriteState = (alienSpriteState == 0) ? 1 : 0;
+                timerState = 0;
             }
         }
 
