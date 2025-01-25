@@ -11,5 +11,5 @@ This game was inspired by Kenny Yip Coding's video:
 - **Spacebar**: Shoot
 
 ## Fonts
-Visitor - https://www.dafont.com/visitor.font
-- visitor1.ttf
+- **Visitor**: [Download from dafont.com](https://www.dafont.com/visitor.font)  
+  Filename: `visitor1.ttf`
