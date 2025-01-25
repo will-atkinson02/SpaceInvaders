@@ -9,3 +9,7 @@ This game was inspired by Kenny Yip Coding's video:
 ## Controls
 - **Arrow Keys**: Move left and right  
 - **Spacebar**: Shoot
+
+## Fonts
+Visitor - https://www.dafont.com/visitor.font
+- visitor1.ttf
