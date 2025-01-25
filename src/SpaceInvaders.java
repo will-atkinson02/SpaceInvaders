@@ -330,106 +330,19 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public void draw(Graphics g) {
-        //ship
+        //render Entities
         g.drawImage(ship.imgArray.get(shipSpriteState), ship.x, ship.y, ship.width, ship.height, null);
+        
+        EntityRenderer.renderAliens(g, alienArray, recentlyExploded, explosionDuration, alienWidth, alienHeight, alienSpriteState);
+        EntityRenderer.renderUFO(g, ufoEntity, ufoHit, customFont, explosionDuration, ufoVelocityX, ufoCount, alienWidth, alienHeight, ufoImg);
+        
+        EntityRenderer.renderZigzagProjectile(g, zigzag, zigzagConvolution, tileSize);
+        EntityRenderer.renderTProjectile(g, tArray, tShapesX, tShapesY, animationFrame, tileSize);
+        
+        EntityRenderer.renderBullets(g, bulletArray, bulletWidth, bulletHeight);
 
-        //aliens
-        for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
-            if (i == recentlyExploded) {
-                g.drawImage(alien.imgArray.get(2), alien.x, alien.y, alienWidth, alienHeight, null);
-                if (explosionDuration == 2) {
-                    recentlyExploded = -1;
-                    explosionDuration = 0;
-                }
-            }
-            else if (alien.alive) {
-                g.drawImage(alien.imgArray.get(alienSpriteState), alien.x, alien.y, alienWidth, alienHeight, null);
-            }
-        }
-
-        //ufo
-        if (ufoEntity != null) {
-            if (ufoHit) {
-                g.setColor(Color.white);
-                g.setFont(FontLoader.customiseFont(customFont, 0, 30));
-                int xShift;
-                if (ufoEntity.points < 100) {
-                    xShift = 8;
-                } else {
-                    xShift = 4;
-                }
-
-                if (explosionDuration < 8) {
-                    g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x + xShift, ufoEntity.y + 23);
-                } else if (explosionDuration < 24 && explosionDuration > 16) {
-                    g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x + xShift, ufoEntity.y + 23);
-                } else if (explosionDuration >= 24) {
-                    ufoVelocityX = 4;
-                    ufoHit = false;
-                    ufoEntity = null;
-                    explosionDuration = 0;
-                    ufoCount = 0;
-                }
-            } else {
-                g.drawImage(ufoImg, ufoEntity.x, ufoEntity.y, alienWidth, alienHeight, null);
-            }
-        } 
-
-        //zigzag
-        if (zigzag != null) {
-            g.setColor(Color.white);
-            for (int i = 0; i < 7; i++) {
-                g.fillRect(zigzag.x + zigzagConvolution.get(i), zigzag.y + 4*i, tileSize/8, tileSize/8);
-            }
-        }
-
-        //t projectile
-        if (!tArray.isEmpty()) {
-            g.setColor(Color.white);
-            for (int i = 0; i < tArray.size(); i++) {
-                Entity tProjectile = tArray.get(i);
-                for (int j = 0; j < 8; j++) {
-                    g.fillRect(tProjectile.x + tShapesX.get(animationFrame)[j], tProjectile.y + tShapesY.get(animationFrame)[j], tileSize/8, tileSize/8);
-                }
-            }
-        }
-
-        //bullets
-        g.setColor(Color.white);
-        for (int i = 0; i < bulletArray.size(); i++) {
-            Entity bullet = bulletArray.get(i);
-            if (!bullet.used) {
-                g.fillRect(bullet.x, bullet.y, bulletWidth, bulletHeight);
-            }
-        }
-
-        //score 
-        g.setColor(Color.white);
-        g.setFont(customFont);
-        if (gameOver) {
-            if (playAgainOverlay == null) {
-                if (score > highscore) {
-                    highScoreManager.writeHighScore(score);
-                }
-                initialisePlayAgainOverlay();
-                showModalOverlay(playAgainOverlay); 
-            }
-        } else {
-            g.setFont(FontLoader.customiseFont(customFont, 0, 30));
-            g.drawString("Score:",130, 32);
-            g.drawString("Highscore:",405, 32);
-            g.drawString("Lives:", 735, 32);
-
-            g.setColor(new Color(62, 250, 47));
-            g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 125, 62);
-            g.drawString("0".repeat(6 -  String.valueOf(highscore).length()) + String.valueOf(highscore), 435, 62);
-            
-            for (int i = 0; i < lives; i++) {
-                g.drawImage(shipImgA, 705 + shipWidth*3/4*i, 40, shipWidth*3/4, shipHeight*3/4, null);
-            }
-        }
-        g.setColor(Color.white);
+        //render HUD
+        HUDRenderer.renderHUD(g, customFont, gameOver, score, highscore, lives, shipImgA, shipWidth, shipHeight);
     }
 
     public void move() {
@@ -482,7 +395,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             alienPosition = 0;
         }
         
-        //ufo
+        //ufo ** maybe move some of this logic elsewhere if its not to do with movement
         if (allowUFOs) {
             if (ufoEntity == null) {
                 if (ufoCount == 120) {
@@ -768,6 +681,11 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         
         if (recentlyExploded >= 0) {
             explosionDuration++;
+            if (explosionDuration == 2) {
+                System.out.println("hey");
+                recentlyExploded = -1;
+                explosionDuration = 0;
+            }
         }
 
         if (ufoEntity == null && allowUFOs) {
@@ -776,6 +694,13 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         if (ufoHit) {
             explosionDuration++;
+            if (explosionDuration >= 24) {
+                ufoVelocityX = 4;
+                ufoHit = false;
+                ufoEntity = null;
+                explosionDuration = 0;
+                ufoCount = 0;
+            }
         }
 
         if (shipHit) {
@@ -811,9 +736,22 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             ship.x += shipVelocityX;
         }
 
+        if (highscore < score) {
+            highscore = score;
+        }
+
         move();
         repaint();
         if (gameOver) {
+            if (score == highscore) {
+                highScoreManager.writeHighScore(score);
+            }
+
+            if (playAgainOverlay == null) {
+                initialisePlayAgainOverlay();
+                showModalOverlay(playAgainOverlay); 
+            }
+
             gameLoop.stop();
             repaint();
         }
