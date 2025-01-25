@@ -1,8 +1,10 @@
 //TODO
-//improve projectiles for last 3 squids
+//make code more modular and readable
 //ensure state is reset on play again or increased correctly on level complete
+//update highscore live
 //improve overlays
 //add sound effects and music
+// BONUS add green shield things, alien bullet collisions with floor
 
 import java.awt.*;
 import java.awt.event.*;
@@ -512,7 +514,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                     lives -= 1;
                     shipHit = true;
                     zigzag = null;
-                    System.out.println("zigzag collision");
                 } 
             }
         }
@@ -678,20 +679,32 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 if (zigzagSpawnTimer == zigzagSpawnInterval) {
                     Random r = new Random();
                     alienIndex = r.nextInt(11);
-                    while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
-                        alienIndex = r.nextInt(11);
-                    }
-    
-                    int y = alienArray.get(alienIndex).y + tileSize;
-                    int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                    zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                    zigzagSpawnTimer = 0;
-    
-                    if (rechargingAliens.size() == 3) {
-                        rechargingAliens.remove(0);
-                    }
 
-                    if (aliveSquidCount > 3) {
+                    if (aliveSquidCount <= 3) {
+                        if (alienIndex < 4) {
+                            while (!alienArray.get(alienIndex).alive) {
+                                alienIndex = r.nextInt(11);
+                            }
+            
+                            int y = alienArray.get(alienIndex).y + tileSize;
+                            int x = alienArray.get(alienIndex).x + tileSize*13/16;
+                            zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+                            zigzagSpawnTimer = 0;
+                        }
+                    } else {
+                        while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
+                            alienIndex = r.nextInt(11);
+                        }
+        
+                        int y = alienArray.get(alienIndex).y + tileSize;
+                        int x = alienArray.get(alienIndex).x + tileSize*13/16;
+                        zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+                        zigzagSpawnTimer = 0;
+        
+                        if (rechargingAliens.size() == 3) {
+                            rechargingAliens.remove(0);
+                        }
+    
                         rechargingAliens.add(alienIndex);
                     }
                 }
@@ -712,21 +725,37 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 if (tSpawnTimer == tSpawnInterval) {
                     Random r = new Random();
                     alienIndex = r.nextInt(11);
-                    while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
-                        alienIndex = r.nextInt(11);
-                    }
-    
-                    int y = alienArray.get(alienIndex).y + tileSize;
-                    int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                    Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                    tArray.add(tProjectile);
-    
-                    tSpawnTimer = 0;
-                    if (rechargingAliens.size() == 3) {
-                        rechargingAliens.remove(0);
-                    } 
-                    
-                    if (aliveSquidCount > 3) {
+
+                    if (aliveSquidCount <= 3) {
+                        if (alienIndex < 4) {
+                            while (!alienArray.get(alienIndex).alive) {
+
+                                alienIndex = r.nextInt(11);
+                            }
+            
+                            int y = alienArray.get(alienIndex).y + tileSize;
+                            int x = alienArray.get(alienIndex).x + tileSize*13/16;
+                            Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+                            tArray.add(tProjectile);
+            
+                            tSpawnTimer = 0;
+                        }
+                    } else {
+                        while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
+
+                            alienIndex = r.nextInt(11);
+                        }
+        
+                        int y = alienArray.get(alienIndex).y + tileSize;
+                        int x = alienArray.get(alienIndex).x + tileSize*13/16;
+                        Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+                        tArray.add(tProjectile);
+        
+                        tSpawnTimer = 0;
+                        if (rechargingAliens.size() == 3) {
+                            rechargingAliens.remove(0);
+                        } 
+                        
                         rechargingAliens.add(alienIndex);
                     }
                 }
