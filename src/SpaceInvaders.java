@@ -1,7 +1,6 @@
 //TODO
-//make code more modular and readable
+//make code more modular and readable - draw completed
 //ensure state is reset on play again or increased correctly on level complete
-//update highscore live
 //improve overlays
 //add sound effects and music
 // BONUS add green shield things, alien bullet collisions with floor
@@ -65,7 +64,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int alienWidth = tileSize*2;
     int alienHeight = tileSize;
     int alienX = tileSize*4;
-    int alienY = tileSize*5; 
+    int alienY = tileSize*11; 
     int alienVelocityX = 8;
 
     Entity ufoEntity = null;
@@ -97,6 +96,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     int score = 0;
     int lives = 3;
+    int level = 0;
     boolean gameOver = false;
 
     //zigzag projectile
@@ -106,7 +106,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     int zigzagAnimationInterval = 5;
     int zigzagAnimationTimer = 0;
 
-    int zigzagSpawnInterval = 60;
+    int zigzagSpawnInterval = 90;
     int zigzagSpawnTimer = 0;
 
     int alienIndex;
@@ -116,7 +116,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     ArrayList<int[]> tShapesX = new ArrayList<>();
     ArrayList<int[]> tShapesY = new ArrayList<>();
 
-
     int tAnimationInterval = 5;
     int tAnimationTimer = 0;
 
@@ -125,8 +124,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     int animationDirection = -1;
     int animationFrame = 4;
-
-    
 
     //prevent same alien firing twice
     ArrayList<Integer> rechargingAliens;
@@ -222,19 +219,19 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         tShapesY = new ArrayList<int[]>();
             
 
-        // Right-heavy (standard T)
+        //standard T
         tShapesX.add(new int[]{0, 4, 8, 4, 4, 4, 4, 4});
         tShapesY.add(new int[]{0, 0, 0, 4, 8, 12, 16, 20});
 
-        // Top-heavy middle cross
+        //Top-heavy middle cross
         tShapesX.add(new int[]{4, 4, 0, 4, 8, 4, 4, 4});
         tShapesY.add(new int[]{0, 4, 8, 8, 8, 12, 16, 20});
 
-        // Bottom-heavy middle cross
+        //Bottom-heavy middle cross
         tShapesX.add(new int[]{4, 4, 4, 0, 4, 8, 4, 4});
         tShapesY.add(new int[]{0, 4, 8, 12, 12, 12, 16, 20});
 
-        // Left-heavy (upside-down T)
+        //upside-down T
         tShapesX.add(new int[]{4, 4, 4, 4, 4, 0, 4, 8});
         tShapesY.add(new int[]{0, 4, 8, 12, 16, 20, 20, 20});
     }
@@ -249,31 +246,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     private void initialiseJPanel(String labelText, String buttonText, boolean isTitle) {
-        JPanel modal = new JPanel();
-        modal.setBackground(new Color(0, 0, 0, 200));
-        modal.setPreferredSize(new Dimension(boardWidth, boardHeight));
-        modal.setLayout(new GridBagLayout());
-
-        JLabel titleLabel = new JLabel(labelText);
-        titleLabel.setFont(FontLoader.customiseFont(customFont, 0, 50));
-        titleLabel.setForeground(Color.WHITE);
-
-        JButton startButton = new JButton(buttonText);
-        startButton.setFont(FontLoader.customiseFont(customFont, 0, 40));
-        startButton.setForeground(Color.white);
-        startButton.setBackground(new Color(0, 128, 0));
-        startButton.setMargin(new Insets(20, 10, 20, 10));
-        startButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                startButton.setBackground(new Color(80, 0, 255));
-            }
-
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                startButton.setBackground(new Color(40, 0, 128));
-            }
-        });
+        JPanel modal = CreateJComponents.createJPanel(boardWidth, boardHeight);
+        JLabel titleLabel = CreateJComponents.createTitleLabel(labelText, customFont);
+        JButton startButton = CreateJComponents.createJButton(buttonText, customFont, isTitle);
         startButton.addActionListener(e -> handleButtonAction(buttonText, isTitle));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -296,15 +271,21 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             gameLoop.start();
         } else {
             removeModalOverlay(this.playAgainOverlay);
-            ship.x = shipX;
             alienArray.clear();
             bulletArray.clear();
-            score = 0;
+
+            ship.x = shipX;
             alienVelocityX = 8;
-            timerState = 0;
-            shipSpriteState = 0;
+            
+            score = 0;
             lives = 3;
+
+            timerState = 0;
+            tickRate = 24;
+            shipSpriteState = 0;
+
             createAliens();
+
             gameLoop.start();
             gameOver = false;
         }
@@ -398,7 +379,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //ufo ** maybe move some of this logic elsewhere if its not to do with movement
         if (allowUFOs) {
             if (ufoEntity == null) {
-                if (ufoCount == 120) {
+                if (ufoCount == 160) {
                     double randomNumber = Math.random();
                     int points = ufoPoints();
                     if (randomNumber > 0.75 || randomNumber < 0.25) {
@@ -485,11 +466,27 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         //next level
         if (alienCount == 0) {
-            score += alienRows * alienCols * 100;
             alienArray.clear();
             bulletArray.clear();
-            alienVelocityX += 4;
+            tArray.clear();
+            zigzag = null;
+
+            level += 1;
+            score += level * alienCols * 100;
+
+            shipSpriteState = 0;
+
             timerState = 0;
+            tickRate = 24 - level;
+
+            if (alienVelocityX < 0) {
+                alienVelocityX *= -1;
+            }
+            alienVelocityX += 4;
+
+            tSpawnInterval -= 5;
+            zigzagSpawnInterval -=5;
+
             createAliens();
         }
     }
@@ -571,17 +568,33 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                a.y + a.height > b.y;
     }
 
+    public void createZigzag() {
+        int y = alienArray.get(alienIndex).y + tileSize;
+        int x = alienArray.get(alienIndex).x + tileSize*13/16;
+        zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+    }
+
+    public void createTProjectile() {
+        int y = alienArray.get(alienIndex).y + tileSize;
+        int x = alienArray.get(alienIndex).x + tileSize*13/16;
+        Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
+        tArray.add(tProjectile);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         int aliveSquidCount = 0;
-        for (int i = 0; i < 11; i++) {
-            Entity alien = alienArray.get(i);
-            if (alien.alive) {
-                aliveSquidCount++;
+        if (!gameOver) {
+            for (int i = 0; i < 11; i++) {
+                Entity alien = alienArray.get(i);
+                if (alien.alive) {
+                    aliveSquidCount++;
+                }
             }
         }
-
         if (aliveSquidCount > 0) {
+            Random r = new Random();
+
             zigzagAnimationTimer++;
             if (zigzagAnimationTimer == zigzagAnimationInterval) {
                 moveFirstToEnd(zigzagConvolution);
@@ -590,36 +603,25 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             if (zigzag == null) {
                 zigzagSpawnTimer++;
                 if (zigzagSpawnTimer == zigzagSpawnInterval) {
-                    Random r = new Random();
                     alienIndex = r.nextInt(11);
-
-                    if (aliveSquidCount <= 3) {
-                        if (alienIndex < 4) {
-                            while (!alienArray.get(alienIndex).alive) {
-                                alienIndex = r.nextInt(11);
-                            }
-            
-                            int y = alienArray.get(alienIndex).y + tileSize;
-                            int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                            zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                            zigzagSpawnTimer = 0;
-                        }
-                    } else {
+                    if (aliveSquidCount > 3) {
                         while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
                             alienIndex = r.nextInt(11);
                         }
-        
-                        int y = alienArray.get(alienIndex).y + tileSize;
-                        int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                        zigzag = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                        zigzagSpawnTimer = 0;
-        
                         if (rechargingAliens.size() == 3) {
                             rechargingAliens.remove(0);
                         }
-    
-                        rechargingAliens.add(alienIndex);
+                        createZigzag();
+                    } else {
+                        rechargingAliens.clear();
+                        if (r.nextDouble() < 0.4) {
+                            while (!alienArray.get(alienIndex).alive) {
+                                alienIndex = r.nextInt(11);
+                            }
+                            createZigzag();
+                        }
                     }
+                    zigzagSpawnTimer = 0;
                 }
             }
     
@@ -636,41 +638,33 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             if (tArray.size() < 3) {
                 tSpawnTimer++;
                 if (tSpawnTimer == tSpawnInterval) {
-                    Random r = new Random();
                     alienIndex = r.nextInt(11);
 
-                    if (aliveSquidCount <= 3) {
-                        if (alienIndex < 4) {
-                            while (!alienArray.get(alienIndex).alive) {
-
-                                alienIndex = r.nextInt(11);
-                            }
-            
-                            int y = alienArray.get(alienIndex).y + tileSize;
-                            int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                            Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                            tArray.add(tProjectile);
-            
-                            tSpawnTimer = 0;
-                        }
-                    } else {
+                    if (aliveSquidCount > 3) {
                         while (rechargingAliens.contains(alienIndex) || !alienArray.get(alienIndex).alive) {
 
                             alienIndex = r.nextInt(11);
                         }
         
-                        int y = alienArray.get(alienIndex).y + tileSize;
-                        int x = alienArray.get(alienIndex).x + tileSize*13/16;
-                        Entity tProjectile = new Entity(x, y, tileSize*3/8, tileSize*7/8, null, 0.0, 0);
-                        tArray.add(tProjectile);
+                        createTProjectile();
         
-                        tSpawnTimer = 0;
                         if (rechargingAliens.size() == 3) {
                             rechargingAliens.remove(0);
                         } 
                         
                         rechargingAliens.add(alienIndex);
+                        
+                    } else {
+                        rechargingAliens.clear();
+                        if (r.nextDouble() < 0.4) {
+                            while (!alienArray.get(alienIndex).alive) {
+
+                                alienIndex = r.nextInt(11);
+                            }
+                            createTProjectile();
+                        }
                     }
+                    tSpawnTimer = 0;
                 }
             }
         }
@@ -682,7 +676,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         if (recentlyExploded >= 0) {
             explosionDuration++;
             if (explosionDuration == 2) {
-                System.out.println("hey");
                 recentlyExploded = -1;
                 explosionDuration = 0;
             }
