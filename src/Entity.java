@@ -25,4 +25,14 @@ public class Entity {
     public double getPaddingRatio() {
         return paddingRatio;
     }
+
+    public static boolean detectCollision(Entity a, Entity b) {
+        int innerBx = b.x + (int)(b.width*b.paddingRatio/2);
+        int innerBWidth = (int)(b.width*(1 - b.paddingRatio));
+    
+        return a.x < innerBx + innerBWidth &&
+               a.x + a.width > innerBx &&
+               a.y < b.y + b.height &&
+               a.y + a.height > b.y;
+    }
 }

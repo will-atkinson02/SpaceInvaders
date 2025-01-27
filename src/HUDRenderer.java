@@ -2,11 +2,15 @@ import java.awt.*;
 
 public class HUDRenderer {
     public static void renderHUD(Graphics g, Font customFont, boolean gameOver, int score, int highscore, int lives, Image shipImgA, int shipWidth, int shipHeight) {
-            if (!gameOver) {
-                g.setFont(FontLoader.customiseFont(customFont, 0, 30));
-    
-                g.setColor(new Color(62, 250, 47));
-                g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 125, 62);
+        if (!gameOver) {
+            if (score > highscore) {
+                highscore = score;
+            }
+
+            g.setFont(FontLoader.customiseFont(customFont, 0, 30));
+
+            g.setColor(new Color(62, 250, 47));
+            g.drawString("0".repeat(6 - String.valueOf(score).length()) + String.valueOf(score), 125, 62);
             g.drawString("0".repeat(6 -  String.valueOf(highscore).length()) + String.valueOf(highscore), 435, 62);
             
             g.setColor(Color.white);
