@@ -1,7 +1,7 @@
 import java.io.*;
 
 public class HighScore {
-    String FILE_NAME = "highscore.txt";
+    String FILE_NAME = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/assets/highscore.txt";
 
     public int readHighScore() {
         int highscore = 0;
@@ -14,7 +14,7 @@ public class HighScore {
                 return highscore;
             }
 
-            BufferedReader reader = new BufferedReader(new FileReader("highscore.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader(file));
 
             String line = reader.readLine();
             if (line != null) {

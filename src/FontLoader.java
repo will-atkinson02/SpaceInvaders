@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class FontLoader {
     public static Font loadFont(String fileName) {
-        String fontPath = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/fonts/Visitor/";
+        String fontPath = "C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/assets/fonts/Visitor/";
 
         try {
             // Load the custom font
