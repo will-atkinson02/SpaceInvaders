@@ -1,18 +1,19 @@
+package Entities;
 import java.awt.*;
 import java.util.ArrayList;
 
 public class Entity {
-    int x;
-    int y;
-    int width;
-    int height;
-    ArrayList<Image> imgArray;
-    double paddingRatio;
-    int points;
-    boolean alive = true;
-    boolean used = false;
+    public int x;
+    public int y;
+    public int width;
+    public int height;
+    public ArrayList<Image> imgArray;
+    public double paddingRatio;
+    public int points;
+    public boolean alive = true;
+    public boolean used = false;
 
-    Entity(int x, int y, int width, int height, ArrayList<Image> imgArray, double paddingRatio, int points) {
+    public Entity(int x, int y, int width, int height, ArrayList<Image> imgArray, double paddingRatio, int points) {
         this.x = x;
         this.y = y; 
         this.width = width;

@@ -1,17 +1,20 @@
+package Entities;
 import java.awt.*;
 import java.util.*;
 
+import GameState.GameState;
+
 public class Ship extends Entity {
     int velocityX;
-    int lives;
-    int shipSpriteState;
+    public int lives;
+    public int shipSpriteState;
     int shipSpriteTimer;
-    boolean shipHit;
-    boolean movingLeft;
-    boolean movingRight;
-    int reloadTime;
+    public boolean shipHit;
+    public boolean movingLeft;
+    public boolean movingRight;
+    public int reloadTime;
 
-    Ship(int tileSize, int cols, int boardHeight, ArrayList<Image> imgArray, double paddingRatio, int points) {
+    public Ship(int tileSize, int cols, int boardHeight, ArrayList<Image> imgArray, double paddingRatio, int points) {
         super((tileSize*cols)/2 - tileSize, boardHeight - tileSize*2, tileSize*2, tileSize, imgArray, paddingRatio, points);
         this.velocityX = 8;
         this.lives = 3;
@@ -36,7 +39,7 @@ public class Ship extends Entity {
 
     public void handleShipHit(GameState gameState, AlienArray alienArray) {
         if (this.shipHit) {
-            SoundPlayer.playSound("sounds/shipExplosion.wav");
+            // SoundPlayer.playSound("C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/assets/sounds/shipExplosion.wav");
             
             this.shipSpriteTimer++;
             

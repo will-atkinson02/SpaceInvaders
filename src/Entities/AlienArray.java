@@ -1,26 +1,27 @@
+package Entities;
 import java.awt.*;
 import java.util.*;
 
 public class AlienArray {
-    ArrayList<Entity> alienArray;
+    public ArrayList<Entity> alienArray;
     int alienRows;
-    int alienCols;
+    public int alienCols;
 
-    int alienVelocityX;
+    public int alienVelocityX;
 
-    int alienCount;
-    int aliveSquidCount;
+    public int alienCount;
+    public int aliveSquidCount;
 
     int alienStepTimer;
-    int alienStepRate;
+    public int alienStepRate;
 
-    int alienSpriteTimer = 0;
-    int alienSpriteState = 0;
+    public int alienSpriteTimer = 0;
+    public int alienSpriteState = 0;
 
     boolean wallCollison;
     boolean allowMove;
 
-    AlienArray() {
+    public AlienArray() {
         this.alienArray = new ArrayList<Entity>();
         this.alienRows = 5;
         this.alienCols = 11;
@@ -86,7 +87,7 @@ public class AlienArray {
         this.alienCount = alienArray.size();
     }
 
-    public void alienMovement(int alienWidth, int boardWidth, int tileSize, Ship ship, boolean allowUFOs) {
+    public void alienMovement(int alienWidth, int boardWidth, int tileSize, Ship ship, UFO ufo) {
         this.alienStepTimer++;
         if (alienStepTimer >= alienStepRate && !ship.shipHit) {
             if (!wallCollison) {
@@ -94,7 +95,7 @@ public class AlienArray {
             } 
 
             if (!allowMove) {
-                moveVertically(tileSize, ship, allowUFOs);
+                moveVertically(tileSize, ship, ufo);
                 allowMove = true;
             } else {
                 moveHorizontally();
@@ -128,7 +129,7 @@ public class AlienArray {
         }
     }
 
-    public void moveVertically(int tileSize, Ship ship, boolean allowUFOs) {
+    public void moveVertically(int tileSize, Ship ship, UFO ufo) {
         this.alienVelocityX *= -1;
 
         for (int i = 0; i < alienArray.size(); i++) {
@@ -138,8 +139,8 @@ public class AlienArray {
                     aliensWin(ship.shipHit, ship.shipSpriteState, ship.lives);
                 } else {
                     alien.y += tileSize;
-                    if (alien.y >= tileSize*6 && !allowUFOs) {
-                        allowUFOs = true;
+                    if (alien.y >= tileSize*6 && !ufo.allowSpawn) {
+                        ufo.allowSpawn = true;
                     }
                 }
             }

@@ -1,4 +1,8 @@
+package Rendering;
 import java.awt.*;
+
+import GameState.GameState;
+import Utilities.FontLoader;
 
 public class HUDRenderer {
     public static void renderHUD(Graphics g, Font customFont, GameState gameState, int highscore, int lives, Image shipImgA, int shipWidth, int shipHeight) {

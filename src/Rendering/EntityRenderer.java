@@ -1,5 +1,9 @@
+package Rendering;
 import java.awt.*;
 import java.util.ArrayList;
+
+import Entities.*;
+import Utilities.FontLoader;
 
 public class EntityRenderer {
     public static void renderBullets(Graphics g, ArrayList<Entity> bulletArray, int bulletWidth, int bulletHeight) {
@@ -46,25 +50,25 @@ public class EntityRenderer {
         }
     }
 
-    public static void renderUFO(Graphics g, Entity ufoEntity, boolean ufoHit, Font customFont, int explosionDuration, int ufoVelocityX, int ufoCount, int alienWidth, int alienHeight, Image ufoImg) {
-        if (ufoEntity != null) {
-            if (ufoHit) {
+    public static void renderUFO(Graphics g, UFO ufo, Font customFont, Image ufoImg) {
+        if (ufo.isActive) {
+            if (ufo.hit) {
                 g.setColor(Color.white);
                 g.setFont(FontLoader.customiseFont(customFont, 0, 30));
                 int xShift;
-                if (ufoEntity.points < 100) {
+                if (ufo.points < 100) {
                     xShift = 8;
                 } else {
                     xShift = 4;
                 }
 
-                if (explosionDuration < 8) {
-                    g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x + xShift, ufoEntity.y + 23);
-                } else if (explosionDuration < 24 && explosionDuration > 16) {
-                    g.drawString(Integer.toString(ufoEntity.points), ufoEntity.x + xShift, ufoEntity.y + 23);
+                if (ufo.explosionTimer < 8) {
+                    g.drawString(Integer.toString(ufo.points), ufo.x + xShift, ufo.y + 23);
+                } else if (ufo.explosionTimer < 24 && ufo.explosionTimer > 16) {
+                    g.drawString(Integer.toString(ufo.points), ufo.x + xShift, ufo.y + 23);
                 }
             } else {
-                g.drawImage(ufoImg, ufoEntity.x, ufoEntity.y, alienWidth, alienHeight, null);
+                g.drawImage(ufoImg, ufo.x, ufo.y, ufo.width, ufo.height, null);
             }
         } 
     }
