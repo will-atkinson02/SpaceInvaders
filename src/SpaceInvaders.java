@@ -25,24 +25,12 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     AlienArray alienArray;
     UFO ufo;
 
+    BulletController bulletController;
     ZProjectile zProjectile;
     ZController zController;
     
-    int alienWidth = gs.tileSize*2;
-    int alienHeight = gs.tileSize;
-    int alienX = gs.tileSize*4;
-    int alienY = gs.tileSize*4; 
-
-    ArrayList<Entity> bulletArray;
-    int bulletWidth = gs.tileSize/8;
-    int bulletHeight = gs.tileSize/2;
-    int bulletVelocityY = -16;
-
     //states
-    int recentlyExploded = -1;
-    int explosionDuration = 0;
 
-    int alienIndex;
 
     //t projectile
     ArrayList<Entity> tArray;
@@ -73,6 +61,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     Font customFont = FontLoader.loadFont("visitor1.ttf");
 
     SpaceInvaders(GameState gs) {
+        this.gs = gs;
+
         setPreferredSize(new Dimension(gs.boardWidth, gs.boardHeight));
         setBackground(Color.black);
         setFocusable(true);
@@ -80,17 +70,17 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         initialiseTitleModalOverlay();
         showModalOverlay(titleOverlay);
-        this.gs = gs;
+
         images = new ImageLoader();
 
         alienArray = new AlienArray();
-        alienArray.createAliens(alienX, alienY, alienWidth, alienHeight, images.squidImgs, images.crabImgs, images.octopusImgs);
-        ship = new Ship(gs, images.shipImgs, 0.0, 0);
+        alienArray.createAliens(gs, images.squidImgs, images.crabImgs, images.octopusImgs);
+        ship = new Ship(gs, images.shipImgs);
         ufo = new UFO(gs.tileSize, images.ufoImgs);
 
         tArray = new ArrayList<Entity>();
         zController = new ZController();
-        bulletArray = new ArrayList<Entity>();
+        bulletController = new BulletController();
 
         rechargingAliens = new ArrayList<Integer>();
 
@@ -98,8 +88,6 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         gameLoop = new Timer(1000/60, this);
     }
-
-    
 
     public void initaliseTSHapes() {
         tShapesX = new ArrayList<int[]>();
@@ -174,7 +162,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
             ship.shipSpriteState = 0;
 
-            alienArray.createAliens(alienX, alienY, alienWidth, alienHeight, images.squidImgs, images.crabImgs, images.octopusImgs);
+            alienArray.createAliens(gs, images.squidImgs, images.crabImgs, images.octopusImgs);
 
             gameLoop.start();
             gs.gameOver = false;
@@ -183,7 +171,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     public void clearEntities() {
         alienArray.alienArray.clear();
-        bulletArray.clear();
+        bulletController.bulletArray.clear();
         tArray.clear();
         zProjectile = null;
     }
@@ -211,7 +199,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         //render Entities
         g.drawImage(ship.imgArray.get(ship.shipSpriteState), ship.x, ship.y, ship.width, ship.height, null);
         
-        EntityRenderer.renderAliens(g, alienArray.alienArray, recentlyExploded, explosionDuration, alienWidth, alienHeight, alienArray.alienSpriteState);
+        EntityRenderer.renderAliens(g, alienArray.alienArray, alienArray.explodedAlienIndex, alienArray.explosionTimer, alienArray.alienSpriteState);
         
         if (ufo.isActive) {
             EntityRenderer.renderUFO(g, ufo, customFont, images.ufoImg);
@@ -220,14 +208,14 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         EntityRenderer.renderZProjectile(g, zProjectile, gs.tileSize);
         EntityRenderer.renderTProjectile(g, tArray, tShapesX, tShapesY, animationFrame, gs.tileSize);
         
-        EntityRenderer.renderBullets(g, bulletArray, bulletWidth, bulletHeight);
+        EntityRenderer.renderBullets(g, bulletController.bulletArray);
 
         //render HUD
         HUDRenderer.renderHUD(g, customFont, gs, highscore, ship.lives, images.shipImgA, ship.width, ship.height);
     }
 
     public void move() {
-        alienArray.alienMovement(alienWidth, gs.boardWidth, gs.tileSize, ship, ufo);
+        alienArray.alienMovement(gs, ship, ufo);
 
         zController.handleZMovement(gs, ship);
 
@@ -235,8 +223,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         bulletMovement();
 
         //clear bullets
-        while (bulletArray.size() > 0 && (bulletArray.get(0).used || bulletArray.get(0).y < 75)) {
-            bulletArray.remove(0); 
+        while (bulletController.bulletArray.size() > 0 && (bulletController.bulletArray.get(0).used || bulletController.bulletArray.get(0).y < 75)) {
+            bulletController.bulletArray.remove(0); 
         }
     }
 
@@ -250,7 +238,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
                 } else {
                     tProjectile.y += 8;
 
-                    if (Entity.detectCollision(tProjectile, ship)) {
+                    if (CollisionHandler.detectCollision(tProjectile, ship)) {
                         ship.hit();
                         tArray.remove(i);
                     } 
@@ -260,16 +248,16 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     }
 
     public void bulletMovement() {
-        for (int i = 0; i < bulletArray.size(); i++) {
-            Entity bullet = bulletArray.get(i);
-            bullet.y += bulletVelocityY;
+        for (int i = 0; i < bulletController.bulletArray.size(); i++) {
+            Bullet bullet = bulletController.bulletArray.get(i);
+            bullet.y += bullet.velocityY;
 
             //bullet collision with aliens
             for (int j = 0; j < alienArray.alienArray.size(); j++) {
-                Entity alien = alienArray.alienArray.get(j);
-                if (!bullet.used && alien.alive && Entity.detectCollision(bullet, alien)) {
+                Alien alien = alienArray.alienArray.get(j);
+                if (!bullet.used && alien.alive && CollisionHandler.detectCollision(bullet, alien)) {
                     ship.reloadTime = 60;
-                    recentlyExploded = j;
+                    alienArray.explodedAlienIndex = j;
                     bullet.used = true;
                     alien.alive = false;
                     alienArray.alienCount--;
@@ -278,7 +266,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
 
             //bullet collision with ufo
-            if (ufo != null && Entity.detectCollision(bullet, ufo)) {
+            if (ufo != null && CollisionHandler.detectCollision(bullet, ufo)) {
                 bullet.used = true;
                 ship.reloadTime = 60;
                 gs.score += UFO.points();
@@ -291,7 +279,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     public void createTProjectile() {
         int y = alienArray.alienArray.get(alienIndex).y + gs.tileSize;
         int x = alienArray.alienArray.get(alienIndex).x + gs.tileSize*13/16;
-        Entity tProjectile = new Entity(x, y, gs.tileSize*3/8, gs.tileSize*7/8, null, 0.0, 0);
+        Entity tProjectile = new Entity(x, y, gs.tileSize*3/8, gs.tileSize*7/8, null);
         tArray.add(tProjectile);
     }
 
@@ -315,7 +303,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             tSpawnInterval -= 5;
             zController.zSpawnInterval -=5;
 
-            alienArray.createAliens(alienX, alienY, alienWidth, alienHeight, images.squidImgs, images.crabImgs, images.octopusImgs);
+            alienArray.createAliens(gs, images.squidImgs, images.crabImgs, images.octopusImgs);
         }
     }
 
@@ -363,15 +351,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         animationFrame += animationDirection;
     }
 
-    public void alienExplosionTimer() {
-        if (recentlyExploded >= 0) {
-            explosionDuration++;
-            if (explosionDuration == 2) {
-                recentlyExploded = -1;
-                explosionDuration = 0;
-            }
-        }
-    }
+    
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -388,7 +368,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
             }
             handleTProjectileSpawn(r);
         }
-        alienExplosionTimer();
+        alienArray.alienExplosionTimer();
 
         if (ship.reloadTime < 60) {
             ship.reloadTime++;
@@ -439,9 +419,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         }
 
         if (e.getKeyCode() == KeyEvent.VK_SPACE && !ship.shipHit) {
-            Entity bullet = new Entity(ship.x + ship.width*15/32, ship.y, bulletWidth, gs.boardHeight, null, 0.0, 0);
+            Bullet bullet = new Bullet(gs, ship.x + ship.width*15/32, ship.y, null);
             if (ship.reloadTime == 60) {
-                bulletArray.add(bullet);
+                bulletController.bulletArray.add(bullet);
                 // SoundPlayer.playSound("sounds/bullet.wav");
                 ship.reloadTime = 0;
             }

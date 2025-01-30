@@ -15,8 +15,11 @@ public class UFO extends Entity {
     
     public int explosionTimer;
 
+    public int points;
+
     public UFO(int tileSize, ArrayList<Image> ufoImages) {
-        super(-tileSize*2, tileSize*4 - 16, tileSize*2, tileSize, ufoImages, 0.0, 0);
+        super(-tileSize*2, tileSize*4 - 16, tileSize*2, tileSize, ufoImages);
+        this.points = 0;
         this.velocityX = 0;
         this.explosionTimer = 0;
         this.hit = false;

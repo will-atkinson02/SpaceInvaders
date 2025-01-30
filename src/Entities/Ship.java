@@ -14,8 +14,13 @@ public class Ship extends Entity {
     public boolean movingRight;
     public int reloadTime;
 
-    public Ship(GameState gs, ArrayList<Image> imgArray, double paddingRatio, int points) {
-        super((gs.tileSize*gs.cols)/2 - gs.tileSize, gs.boardHeight - gs.tileSize*2, gs.tileSize*2, gs.tileSize, imgArray, paddingRatio, points);
+    public Ship(GameState gs, ArrayList<Image> imgArray) {
+        super(
+            (gs.tileSize*gs.cols)/2 - gs.tileSize, 
+            gs.boardHeight - gs.tileSize*2, 
+            gs.tileSize*2, 
+            gs.tileSize, 
+            imgArray);
         this.velocityX = 8;
         this.lives = 3;
         this.shipSpriteState = 0;

@@ -6,18 +6,19 @@ import Entities.*;
 import Utilities.FontLoader;
 
 public class EntityRenderer {
-    public static void renderBullets(Graphics g, ArrayList<Entity> bulletArray, int bulletWidth, int bulletHeight) {
+    public static void renderBullets(Graphics g, ArrayList<Bullet> bulletArray) {
         g.setColor(Color.white);
         for (int i = 0; i < bulletArray.size(); i++) {
-            Entity bullet = bulletArray.get(i);
+            Bullet bullet = bulletArray.get(i);
             if (!bullet.used) {
-                g.fillRect(bullet.x, bullet.y, bulletWidth, bulletHeight);
+                g.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
             }
         }
     }
 
     public static void renderZProjectile(Graphics g, ZProjectile zProjectile, int tileSize) {
         if (zProjectile != null) {
+            System.out.println("Hey");
             g.setColor(Color.white);
             for (int i = 0; i < 7; i++) {
                 g.fillRect(zProjectile.x + zProjectile.zConvolution.get(i), zProjectile.y + 4*i, tileSize/8, tileSize/8);
@@ -37,15 +38,14 @@ public class EntityRenderer {
         }
     }
 
-    public static void renderAliens(Graphics g, ArrayList<Entity> alienArray, int recentlyExploded, int explosionDuration, int alienWidth, int alienHeight, int alienSpriteState) {
+    public static void renderAliens(Graphics g, ArrayList<Alien> alienArray, int recentlyExploded, int explosionDuration, int alienSpriteState) {
         for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
+            Alien alien = alienArray.get(i);
             if (i == recentlyExploded) {
-                g.drawImage(alien.imgArray.get(2), alien.x, alien.y, alienWidth, alienHeight, null);
-                
+                g.drawImage(alien.imgArray.get(2), alien.x, alien.y, alien.width, alien.height, null);
             }
             else if (alien.alive) {
-                g.drawImage(alien.imgArray.get(alienSpriteState), alien.x, alien.y, alienWidth, alienHeight, null);
+                g.drawImage(alien.imgArray.get(alienSpriteState), alien.x, alien.y, alien.width, alien.height, null);
             }
         }
     }

@@ -56,7 +56,7 @@ public class ZController {
             } else {
                 zProjectile.y += 8;
 
-                if (Entity.detectCollision(zProjectile, ship)) {
+                if (CollisionHandler.detectCollision(zProjectile, ship)) {
                     ship.hit();
                     zProjectile = null;
                 } 

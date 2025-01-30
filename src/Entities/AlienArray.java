@@ -2,8 +2,10 @@ package Entities;
 import java.awt.*;
 import java.util.*;
 
+import GameState.GameState;
+
 public class AlienArray {
-    public ArrayList<Entity> alienArray;
+    public ArrayList<Alien> alienArray;
     public int alienRows;
     public int alienCols;
 
@@ -21,8 +23,11 @@ public class AlienArray {
     public boolean wallCollison;
     public boolean allowMove;
 
+    public int explodedAlienIndex;
+    public int explosionTimer;
+
     public AlienArray() {
-        this.alienArray = new ArrayList<Entity>();
+        this.alienArray = new ArrayList<Alien>();
         this.alienRows = 5;
         this.alienCols = 11;
 
@@ -40,20 +45,13 @@ public class AlienArray {
         this.wallCollison = false;
         this.allowMove = true;
 
-        
+        this.explodedAlienIndex = -1;
+        this.explosionTimer = 0;
     }
 
-    public void createAliens(
-        int alienX,
-        int alienY,
-        int alienWidth,
-        int alienHeight,
-        ArrayList<Image> squidImgs,
-        ArrayList<Image> crabImgs,
-        ArrayList<Image> octopusImgs
-    ) {
-        for (int row = 0; row < alienRows; row++) {
-            for (int col = 0; col < alienCols; col++) {
+    public void createAliens(GameState gs, ArrayList<Image> squidImgs, ArrayList<Image> crabImgs, ArrayList<Image> octopusImgs) {
+        for (int row = 0; row < this.alienRows; row++) {
+            for (int col = 0; col < this.alienCols; col++) {
                 ArrayList<Image> imgSet;
                 double paddingRatio;
                 int points; 
@@ -73,15 +71,7 @@ public class AlienArray {
                     points = 10;
                 }
 
-                Entity alien = new Entity(
-                        alienX + col*alienWidth,
-                        alienY + row*alienHeight*3/2,
-                        alienWidth,
-                        alienHeight,
-                        imgSet,
-                        paddingRatio,
-                        points
-                    );
+                Alien alien = new Alien(gs, col, row, imgSet, paddingRatio, points);
 
                 this.alienArray.add(alien);
             }
@@ -89,15 +79,15 @@ public class AlienArray {
         this.alienCount = alienArray.size();
     }
 
-    public void alienMovement(int alienWidth, int boardWidth, int tileSize, Ship ship, UFO ufo) {
+    public void alienMovement(GameState gs, Ship ship, UFO ufo) {
         this.alienStepTimer++;
         if (alienStepTimer >= alienStepRate && !ship.shipHit) {
             if (!wallCollison) {
-                checkWallCollision(alienWidth, boardWidth);
+                checkWallCollision(gs.tileSize*2, gs.boardWidth);
             } 
 
             if (!allowMove) {
-                moveVertically(tileSize, ship, ufo);
+                moveVertically(gs.tileSize, ship, ufo);
                 allowMove = true;
             } else {
                 moveHorizontally();
@@ -124,7 +114,7 @@ public class AlienArray {
 
     public void moveHorizontally() {
         for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
+            Alien alien = alienArray.get(i);
             if (alien.alive) {
                 alien.x += this.alienVelocityX;  
             }
@@ -135,7 +125,7 @@ public class AlienArray {
         this.alienVelocityX *= -1;
 
         for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
+            Alien alien = alienArray.get(i);
             if (alien.alive) {
                 if (alien.y + tileSize == ship.y) {
                     aliensWin(ship.shipHit, ship.shipSpriteState, ship.lives);
@@ -168,7 +158,7 @@ public class AlienArray {
         int aliveSquids = 0;
         if (!alienArray.isEmpty()) {
             for (int i = 0; i < 11; i++) {
-                Entity alien = alienArray.get(i);
+                Alien alien = alienArray.get(i);
                 if (alien.alive) {
                     aliveSquids++;
                 }
@@ -176,5 +166,15 @@ public class AlienArray {
             return aliveSquids;
         }
         return aliveSquids;
+    }
+
+    public void alienExplosionTimer() {
+        if (this.explodedAlienIndex >= 0) {
+            this.explosionTimer++;
+            if (this.explosionTimer == 2) {
+                this.explodedAlienIndex = -1;
+                this.explosionTimer = 0;
+            }
+        }
     }
 }
