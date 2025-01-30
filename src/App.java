@@ -1,22 +1,19 @@
 import javax.swing.*;
+import GameState.GameState;
 
 public class App {
     public static void main(String[] args) throws Exception {
         // window
-        int tileSize = 36;
-        int rows = 22;
-        int cols = 30;
-        int boardHeight = tileSize*rows;
-        int boardWidth = tileSize*cols;
-        
+        GameState gs = new GameState();
+
         JFrame frame = new JFrame("Space Invaders");
         frame.setVisible(true);
-        frame.setSize(boardWidth, boardHeight);
+        frame.setSize(gs.boardWidth, gs.boardHeight);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        SpaceInvaders spaceInvaders = new SpaceInvaders();
+        SpaceInvaders spaceInvaders = new SpaceInvaders(gs);
         frame.add(spaceInvaders);
         frame.pack();
         spaceInvaders.requestFocus();

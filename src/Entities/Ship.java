@@ -14,8 +14,8 @@ public class Ship extends Entity {
     public boolean movingRight;
     public int reloadTime;
 
-    public Ship(int tileSize, int cols, int boardHeight, ArrayList<Image> imgArray, double paddingRatio, int points) {
-        super((tileSize*cols)/2 - tileSize, boardHeight - tileSize*2, tileSize*2, tileSize, imgArray, paddingRatio, points);
+    public Ship(GameState gs, ArrayList<Image> imgArray, double paddingRatio, int points) {
+        super((gs.tileSize*gs.cols)/2 - gs.tileSize, gs.boardHeight - gs.tileSize*2, gs.tileSize*2, gs.tileSize, imgArray, paddingRatio, points);
         this.velocityX = 8;
         this.lives = 3;
         this.shipSpriteState = 0;
@@ -37,7 +37,7 @@ public class Ship extends Entity {
         this.shipHit = true;
     }
 
-    public void handleShipHit(GameState gameState, AlienArray alienArray) {
+    public void handleShipHit(GameState gs, AlienArray alienArray) {
         if (this.shipHit) {
             // SoundPlayer.playSound("C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/assets/sounds/shipExplosion.wav");
             
@@ -49,7 +49,7 @@ public class Ship extends Entity {
 
             if (this.shipSpriteTimer == 50) {
                 if (this.lives == 0) {
-                    gameState.gameOver = true;
+                    gs.gameOver = true;
                     this.shipHit = false;
                 } else {
                     this.shipHit = false;

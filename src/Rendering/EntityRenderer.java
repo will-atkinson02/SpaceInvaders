@@ -16,11 +16,11 @@ public class EntityRenderer {
         }
     }
 
-    public static void renderZigzagProjectile(Graphics g, Entity zigzag, ArrayList<Integer> zigzagConvolution, int tileSize) {
-        if (zigzag != null) {
+    public static void renderZProjectile(Graphics g, ZProjectile zProjectile, int tileSize) {
+        if (zProjectile != null) {
             g.setColor(Color.white);
             for (int i = 0; i < 7; i++) {
-                g.fillRect(zigzag.x + zigzagConvolution.get(i), zigzag.y + 4*i, tileSize/8, tileSize/8);
+                g.fillRect(zProjectile.x + zProjectile.zConvolution.get(i), zProjectile.y + 4*i, tileSize/8, tileSize/8);
             }
         }
     }
@@ -62,6 +62,7 @@ public class EntityRenderer {
                     xShift = 4;
                 }
 
+                //flash the point 0th-8th frames and then 16th-24th frames
                 if (ufo.explosionTimer < 8) {
                     g.drawString(Integer.toString(ufo.points), ufo.x + xShift, ufo.y + 23);
                 } else if (ufo.explosionTimer < 24 && ufo.explosionTimer > 16) {

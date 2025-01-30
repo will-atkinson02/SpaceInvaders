@@ -4,7 +4,7 @@ import java.util.*;
 
 public class AlienArray {
     public ArrayList<Entity> alienArray;
-    int alienRows;
+    public int alienRows;
     public int alienCols;
 
     public int alienVelocityX;
@@ -12,14 +12,14 @@ public class AlienArray {
     public int alienCount;
     public int aliveSquidCount;
 
-    int alienStepTimer;
+    public int alienStepTimer;
     public int alienStepRate;
 
     public int alienSpriteTimer = 0;
     public int alienSpriteState = 0;
 
-    boolean wallCollison;
-    boolean allowMove;
+    public boolean wallCollison;
+    public boolean allowMove;
 
     public AlienArray() {
         this.alienArray = new ArrayList<Entity>();
@@ -39,6 +39,8 @@ public class AlienArray {
 
         this.wallCollison = false;
         this.allowMove = true;
+
+        
     }
 
     public void createAliens(

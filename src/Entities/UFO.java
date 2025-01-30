@@ -23,14 +23,14 @@ public class UFO extends Entity {
         this.isActive = false;
     }
 
-    public void spawnUFO(double randomNumber, int boardWidth, int tileSize, ArrayList<Image> ufoImages) {
+    public void spawnUFO(GameState gs, ArrayList<Image> ufoImages, double randomNumber) {
         if (randomNumber > 0.75) {
-            this.x = boardWidth;
+            this.x = gs.boardWidth;
             this.velocityX = -4;
             this.points = points();
             this.isActive = true;
         } else if (randomNumber < 0.25) {
-            this.x = -tileSize * 2;
+            this.x = -gs.tileSize * 2;
             this.velocityX = 4;
             this.points = points();
             this.isActive = true;
@@ -39,19 +39,19 @@ public class UFO extends Entity {
         }
     }
 
-    public void handle(GameState gameState, int boardWidth, int tileSize, ArrayList<Image> ufoImages) {
+    public void handle(GameState gs, ArrayList<Image> ufoImages) {
         if (this.allowSpawn) {
             if (!this.isActive) {
                 if (this.spawnTimer == 160) {
                     double randomNumber = Math.random();
                     if (randomNumber > 0.75 || randomNumber < 0.25) {
-                        spawnUFO(randomNumber, boardWidth, tileSize, ufoImages);
+                        spawnUFO(gs, ufoImages, randomNumber);
                     }
                     this.spawnTimer = 0;
                 }
             } else {
                 moveHorizontally();
-                if (outOfBounds(boardWidth, tileSize)) {
+                if (outOfBounds(gs)) {
                     this.velocityX = 0;
                     this.isActive = false;
                 }
@@ -63,10 +63,10 @@ public class UFO extends Entity {
         this.x += this.velocityX;
     }
 
-    public boolean outOfBounds(int boardWidth, int tileSize) {
-        if (this.velocityX > 0 && this.x == boardWidth) {
+    public boolean outOfBounds(GameState gs) {
+        if (this.velocityX > 0 && this.x == gs.boardWidth) {
             return true;
-        } else if (this.velocityX < 0 && this.x == -tileSize*2) {
+        } else if (this.velocityX < 0 && this.x == -gs.tileSize*2) {
             return true;
         }
         return false;
