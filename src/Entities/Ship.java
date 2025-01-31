@@ -3,24 +3,27 @@ import java.awt.*;
 import java.util.*;
 
 import GameState.GameState;
+import Utilities.SoundPlayer;
 
 public class Ship extends Entity {
-    int velocityX;
+    public ArrayList<Image> imageArray;
+    public int velocityX;
     public int lives;
     public int shipSpriteState;
-    int shipSpriteTimer;
+    public int shipSpriteTimer;
     public boolean shipHit;
     public boolean movingLeft;
     public boolean movingRight;
     public int reloadTime;
 
-    public Ship(GameState gs, ArrayList<Image> imgArray) {
+    public Ship(GameState gs, ArrayList<Image> imageArray) {
         super(
             (gs.tileSize*gs.cols)/2 - gs.tileSize, 
             gs.boardHeight - gs.tileSize*2, 
             gs.tileSize*2, 
-            gs.tileSize, 
-            imgArray);
+            gs.tileSize
+        );
+        this.imageArray = imageArray;
         this.velocityX = 8;
         this.lives = 3;
         this.shipSpriteState = 0;
@@ -44,7 +47,7 @@ public class Ship extends Entity {
 
     public void handleShipHit(GameState gs, AlienArray alienArray) {
         if (this.shipHit) {
-            // SoundPlayer.playSound("C:/Users/Will Atkinson/Documents/Coding/Coding projects 2025/SpaceInvaders/assets/sounds/shipExplosion.wav");
+            SoundPlayer.playSound("../assets/sounds/shipExplosion.wav");
             
             this.shipSpriteTimer++;
             
@@ -62,8 +65,12 @@ public class Ship extends Entity {
                 }
                 this.shipSpriteTimer = 0;
             }
-        } else {
-            alienArray.updateAlienSprite();
+        }
+    }
+
+    public void reload() {
+        if (this.reloadTime < 60) {
+            this.reloadTime++;
         }
     }
 }

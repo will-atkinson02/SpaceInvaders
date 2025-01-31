@@ -25,6 +25,8 @@ public class HUDRenderer {
             for (int i = 0; i < lives; i++) {
                 g.drawImage(shipImgA, 705 + shipWidth*3/4*i, 40, shipWidth*3/4, shipHeight*3/4, null);
             }
+
+            g.drawLine(0, 75, 960, 75);
         }
     }
 }

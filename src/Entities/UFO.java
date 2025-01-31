@@ -5,25 +5,24 @@ import java.util.*;
 import GameState.GameState;
 
 public class UFO extends Entity {
+    public ArrayList<Image> imageArray;
     public int velocityX;
     public boolean hit;
-
     public boolean isActive;
-
     public int spawnTimer;
     public boolean allowSpawn;
-    
     public int explosionTimer;
-
     public int points;
 
-    public UFO(int tileSize, ArrayList<Image> ufoImages) {
-        super(-tileSize*2, tileSize*4 - 16, tileSize*2, tileSize, ufoImages);
+    public UFO(int tileSize, ArrayList<Image> imageArray) {
+        super(-tileSize*2, tileSize*4 - 16, tileSize*2, tileSize);
+        this.imageArray = imageArray;
         this.points = 0;
         this.velocityX = 0;
         this.explosionTimer = 0;
         this.hit = false;
         this.isActive = false;
+        this.allowSpawn = false;
     }
 
     public void spawnUFO(GameState gs, ArrayList<Image> ufoImages, double randomNumber) {
@@ -43,22 +42,22 @@ public class UFO extends Entity {
     }
 
     public void handle(GameState gs, ArrayList<Image> ufoImages) {
-        if (this.allowSpawn) {
-            if (!this.isActive) {
-                if (this.spawnTimer == 160) {
-                    double randomNumber = Math.random();
-                    if (randomNumber > 0.75 || randomNumber < 0.25) {
-                        spawnUFO(gs, ufoImages, randomNumber);
-                    }
-                    this.spawnTimer = 0;
+        if (!this.isActive) {
+            this.spawnTimer++;
+            if (this.spawnTimer == 160) {
+                double randomNumber = Math.random();
+                if (randomNumber > 0.75 || randomNumber < 0.25 && this.allowSpawn) {
+                    spawnUFO(gs, ufoImages, randomNumber);
                 }
-            } else {
-                moveHorizontally();
-                if (outOfBounds(gs)) {
-                    this.velocityX = 0;
-                    this.isActive = false;
-                }
+                this.spawnTimer = 0;
             }
+        } else {
+            checkHit();
+            if (outOfBounds(gs)) {
+                this.velocityX = 0;
+                this.isActive = false;
+            }
+            moveHorizontally();
         }
     }
 
@@ -67,28 +66,24 @@ public class UFO extends Entity {
     }
 
     public boolean outOfBounds(GameState gs) {
-        if (this.velocityX > 0 && this.x == gs.boardWidth) {
+        if (this.velocityX > 0 && this.x >= gs.boardWidth) {
             return true;
-        } else if (this.velocityX < 0 && this.x == -gs.tileSize*2) {
+        } else if (this.velocityX < 0 && this.x <= -gs.tileSize*2) {
             return true;
         }
         return false;
     }
 
-    public void incrementUFOs() {
-        if (this.isActive)  {
-            if (this.hit) {
-                this.explosionTimer++;
-                if (this.explosionTimer >= 24) {
-                    this.velocityX = 0;
-                    this.hit = false;
-                    this.isActive = false;
-                    this.spawnTimer = 0;
-                    this.explosionTimer = 0;
-                }
+    public void checkHit() {
+        if (this.hit) {
+            this.explosionTimer++;
+            if (this.explosionTimer >= 24) {
+                this.velocityX = 0;
+                this.hit = false;
+                this.isActive = false;
+                this.spawnTimer = 0;
+                this.explosionTimer = 0;
             }
-        } else if (this.allowSpawn) {
-            this.spawnTimer++;
         }
     }
 

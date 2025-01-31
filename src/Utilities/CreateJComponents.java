@@ -46,4 +46,15 @@ public class CreateJComponents {
 
         return startButton;
     }
+
+    public static JPanel setLayout(JPanel modal, JLabel titleLabel, JButton startButton) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridy = 0;
+        modal.add(titleLabel, gbc);
+        gbc.gridy = 1;
+        modal.add(startButton, gbc);
+
+        return modal;
+    }
 }

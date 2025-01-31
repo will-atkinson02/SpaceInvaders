@@ -15,12 +15,11 @@ public class ZProjectile extends Entity {
     public int alienIndex;
 
     public ZProjectile(int x, int y, GameState gs) {
-        super(x, y, gs.tileSize*3/8, gs.tileSize*7/8, null);
+        super(x, y, gs.tileSize*3/8, gs.tileSize*7/8);
         this.zConvolution = initialiseZConvolution();
 
         this.zAnimationInterval = 5;
         this.zAnimationTimer = 0;
-        System.out.println("spawned");
     }
 
     public ArrayList<Integer> initialiseZConvolution() {

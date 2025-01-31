@@ -18,7 +18,6 @@ public class EntityRenderer {
 
     public static void renderZProjectile(Graphics g, ZProjectile zProjectile, int tileSize) {
         if (zProjectile != null) {
-            System.out.println("Hey");
             g.setColor(Color.white);
             for (int i = 0; i < 7; i++) {
                 g.fillRect(zProjectile.x + zProjectile.zConvolution.get(i), zProjectile.y + 4*i, tileSize/8, tileSize/8);
@@ -26,13 +25,13 @@ public class EntityRenderer {
         }
     }
 
-    public static void renderTProjectile(Graphics g, ArrayList<Entity> tArray, ArrayList<int[]> tShapesX, ArrayList<int[]> tShapesY, int animationFrame, int tileSize) {
+    public static void renderTProjectile(Graphics g, ArrayList<TProjectile> tArray, int tileSize) {
         if (!tArray.isEmpty()) {
             g.setColor(Color.white);
             for (int i = 0; i < tArray.size(); i++) {
-                Entity tProjectile = tArray.get(i);
+                TProjectile t = tArray.get(i);
                 for (int j = 0; j < 8; j++) {
-                    g.fillRect(tProjectile.x + tShapesX.get(animationFrame)[j], tProjectile.y + tShapesY.get(animationFrame)[j], tileSize/8, tileSize/8);
+                    g.fillRect(t.x + t.tShapesX.get(t.animationFrame)[j], t.y + t.tShapesY.get(t.animationFrame)[j], tileSize/8, tileSize/8);
                 }
             }
         }

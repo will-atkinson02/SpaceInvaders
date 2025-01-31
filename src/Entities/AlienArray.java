@@ -26,6 +26,8 @@ public class AlienArray {
     public int explodedAlienIndex;
     public int explosionTimer;
 
+    public int rechargingAlien;
+
     public AlienArray() {
         this.alienArray = new ArrayList<Alien>();
         this.alienRows = 5;
@@ -94,12 +96,14 @@ public class AlienArray {
                 wallCollison = false;
             }
             this.alienStepTimer = 0;
+
+            updateAlienSprite();
         }
     }
 
     public void checkWallCollision(int alienWidth, int boardWidth) {
         for (int i = 0; i < alienArray.size(); i++) {
-            Entity alien = alienArray.get(i);
+            Alien alien = alienArray.get(i);
             if (alien.alive) {
                 //check if aliens are touching walls
                 if (alien.x + alienWidth == boardWidth || alien.x == 0) {
@@ -140,11 +144,7 @@ public class AlienArray {
     }
 
     public void updateAlienSprite() {
-        this.alienSpriteTimer++;
-        if (this.alienSpriteTimer == this.alienStepRate) {
-            this.alienSpriteState = (this.alienSpriteState == 0) ? 1 : 0;
-            this.alienSpriteTimer = 0;
-        }
+        this.alienSpriteState = (this.alienSpriteState == 0) ? 1 : 0;
     }
     
     public void aliensWin(boolean shipHit, int shipSpriteState, int lives) {
@@ -154,18 +154,16 @@ public class AlienArray {
         lives = 0;
     }
 
-    public int countAliveSquids() {
-        int aliveSquids = 0;
-        if (!alienArray.isEmpty()) {
-            for (int i = 0; i < 11; i++) {
+    public void countAliveSquids() {
+        this.aliveSquidCount = 0;
+        if (!this.alienArray.isEmpty()) {
+            for (int i = 0; i < this.alienCols; i++) {
                 Alien alien = alienArray.get(i);
                 if (alien.alive) {
-                    aliveSquids++;
+                    this.aliveSquidCount++;
                 }
             }
-            return aliveSquids;
         }
-        return aliveSquids;
     }
 
     public void alienExplosionTimer() {

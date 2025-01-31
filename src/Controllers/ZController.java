@@ -1,6 +1,5 @@
 package Controllers;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import Entities.*;
@@ -8,13 +7,13 @@ import GameState.GameState;
 
 public class ZController {
     public ZProjectile zProjectile;
-    public int zSpawnInterval;
-    public int zSpawnTimer;
+    public int spawnInterval;
+    public int spawnTimer;
 
     public ZController() {
         this.zProjectile = null;
-        this.zSpawnInterval = 90;
-        this.zSpawnTimer = 0;
+        this.spawnInterval = 90;
+        this.spawnTimer = 0;
     }
 
     public void createZ(GameState gs, AlienArray alienArray, int alienIndex) {
@@ -23,29 +22,29 @@ public class ZController {
         this.zProjectile = new ZProjectile(x, y, gs);
     }
     
-    public void handleZSpawn(GameState gs, Random r, AlienArray alienArray, int alienIndex, ArrayList<Integer> rechargingAliens) {
-        this.zSpawnTimer++;
-        if (this.zSpawnTimer == this.zSpawnInterval) {
+    public void handleZSpawn(GameState gs, Random r, AlienArray alienArray, int alienIndex) {
+        this.spawnTimer++;
+        if (this.spawnTimer == this.spawnInterval) {
             alienIndex = r.nextInt(11);
-            if (alienArray.aliveSquidCount > 3) {
-                while (rechargingAliens.contains(alienIndex) || !alienArray.alienArray.get(alienIndex).alive) {
+            if (r.nextDouble() < 0.4) {
+                if (alienArray.aliveSquidCount == 1) {
+                    alienArray.rechargingAlien = -1;
+                }
+
+                while (alienIndex == alienArray.rechargingAlien || !alienArray.alienArray.get(alienIndex).alive) {
                     alienIndex = r.nextInt(11);
                 }
-                if (rechargingAliens.size() == 3) {
-                    rechargingAliens.remove(0);
-                }
-                createZ(gs, alienArray, alienIndex);
-            } else {
-                rechargingAliens.clear();
-                if (r.nextDouble() < 0.4) {
-                    while (!alienArray.alienArray.get(alienIndex).alive) {
 
-                        alienIndex = r.nextInt(11);
-                    }
+                if (alienArray.aliveSquidCount > 1) {
                     createZ(gs, alienArray, alienIndex);
+                    alienArray.rechargingAlien = alienIndex;
+                } else {
+                    if (r.nextDouble() < 0.2) {
+                        createZ(gs, alienArray, alienIndex);
+                    }
                 }
             }
-            this.zSpawnTimer = 0;
+            this.spawnTimer = 0;
         }
     }
 
