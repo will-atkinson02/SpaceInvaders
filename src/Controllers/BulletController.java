@@ -12,12 +12,12 @@ public class BulletController {
         this.bulletArray = new ArrayList<Bullet>();
     }
 
-     public void handleMovement(GameState gs, AlienArray alienArray, Ship ship, UFO ufo) {
+    public void handleMovement(GameState gs, AlienArray alienArray, Ship ship, UFO ufo) {
         for (int i = 0; i < this.bulletArray.size(); i++) {
             Bullet bullet = this.bulletArray.get(i);
             bullet.y += bullet.velocityY;
 
-            //bullet collision with aliens
+            // bullet collision with aliens
             for (int j = 0; j < alienArray.alienArray.size(); j++) {
                 Alien alien = alienArray.alienArray.get(j);
                 if (!bullet.used && alien.alive && CollisionHandler.detectCollision(bullet, alien)) {
@@ -30,7 +30,7 @@ public class BulletController {
                 }
             }
 
-            //bullet collision with ufo
+            // bullet collision with ufo
             if (ufo != null && CollisionHandler.detectCollision(bullet, ufo)) {
                 bullet.used = true;
                 ship.reloadTime = 60;

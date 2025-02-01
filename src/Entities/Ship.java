@@ -1,7 +1,10 @@
 package Entities;
+
 import java.awt.*;
 import java.util.*;
 
+import Controllers.TController;
+import Controllers.ZController;
 import GameState.GameState;
 import Utilities.SoundPlayer;
 
@@ -18,11 +21,10 @@ public class Ship extends Entity {
 
     public Ship(GameState gs, ArrayList<Image> imageArray) {
         super(
-            (gs.tileSize*gs.cols)/2 - gs.tileSize, 
-            gs.boardHeight - gs.tileSize*2, 
-            gs.tileSize*2, 
-            gs.tileSize
-        );
+                (gs.tileSize * gs.cols) / 2 - gs.tileSize,
+                gs.boardHeight - gs.tileSize * 2,
+                gs.tileSize * 2,
+                gs.tileSize);
         this.imageArray = imageArray;
         this.velocityX = 8;
         this.lives = 3;
@@ -45,12 +47,15 @@ public class Ship extends Entity {
         this.shipHit = true;
     }
 
-    public void handleShipHit(GameState gs, AlienArray alienArray) {
+    public void handleShipHit(GameState gs, AlienArray alienArray, TController tController, ZController zController) {
         if (this.shipHit) {
             SoundPlayer.playSound("../assets/sounds/shipExplosion.wav");
-            
+
+            zController.allowSpawn = false;
+            tController.allowSpawn = false;
+
             this.shipSpriteTimer++;
-            
+
             if (this.shipSpriteTimer % 5 == 0) {
                 this.shipSpriteState = (this.shipSpriteState == 1) ? 2 : 1;
             }
@@ -65,6 +70,9 @@ public class Ship extends Entity {
                 }
                 this.shipSpriteTimer = 0;
             }
+        } else {
+            zController.allowSpawn = true;
+            tController.allowSpawn = true;
         }
     }
 

@@ -9,16 +9,18 @@ public class TController {
     public ArrayList<TProjectile> tArray;
     public int spawnInterval;
     public int spawnTimer;
+    public boolean allowSpawn;
 
     public TController() {
         this.tArray = new ArrayList<TProjectile>();
         this.spawnInterval = 30;
         this.spawnTimer = 0;
+        this.allowSpawn = true;
     }
 
     public void createTProjectile(GameState gs, AlienArray alienArray, int alienIndex) {
         int y = alienArray.alienArray.get(alienIndex).y + gs.tileSize;
-        int x = alienArray.alienArray.get(alienIndex).x + gs.tileSize*13/16;
+        int x = alienArray.alienArray.get(alienIndex).x + gs.tileSize * 13 / 16;
         TProjectile tProjectile = new TProjectile(x, y, gs);
         tArray.add(tProjectile);
     }
@@ -32,7 +34,7 @@ public class TController {
     }
 
     public void handleTProjectileSpawn(GameState gs, Random r, AlienArray alienArray) {
-        if (tArray.size() <= 3) {
+        if (tArray.size() <= 3 && this.allowSpawn) {
             this.spawnTimer++;
             if (this.spawnTimer == this.spawnInterval) {
                 int alienIndex = r.nextInt(11);
@@ -72,7 +74,7 @@ public class TController {
                     if (CollisionHandler.detectCollision(t, ship)) {
                         ship.hit();
                         this.tArray.remove(i);
-                    } 
+                    }
                 }
             }
         }

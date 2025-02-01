@@ -15,7 +15,7 @@ public class ZProjectile extends Entity {
     public int alienIndex;
 
     public ZProjectile(int x, int y, GameState gs) {
-        super(x, y, gs.tileSize*3/8, gs.tileSize*7/8);
+        super(x, y, gs.tileSize * 3 / 8, gs.tileSize * 7 / 8);
         this.zConvolution = initialiseZConvolution();
 
         this.zAnimationInterval = 5;
@@ -43,6 +43,7 @@ public class ZProjectile extends Entity {
             this.zAnimationTimer = 0;
         }
     }
+
     public void moveFirstToEnd(ArrayList<Integer> list) {
         Integer firstElement = list.remove(0);
         list.add(firstElement);

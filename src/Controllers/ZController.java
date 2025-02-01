@@ -9,19 +9,21 @@ public class ZController {
     public ZProjectile zProjectile;
     public int spawnInterval;
     public int spawnTimer;
+    public boolean allowSpawn;
 
     public ZController() {
         this.zProjectile = null;
         this.spawnInterval = 90;
         this.spawnTimer = 0;
+        this.allowSpawn = true;
     }
 
     public void createZ(GameState gs, AlienArray alienArray, int alienIndex) {
         int y = alienArray.alienArray.get(alienIndex).y + gs.tileSize;
-        int x = alienArray.alienArray.get(alienIndex).x + gs.tileSize*13/16;
+        int x = alienArray.alienArray.get(alienIndex).x + gs.tileSize * 13 / 16;
         this.zProjectile = new ZProjectile(x, y, gs);
     }
-    
+
     public void handleZSpawn(GameState gs, Random r, AlienArray alienArray, int alienIndex) {
         this.spawnTimer++;
         if (this.spawnTimer == this.spawnInterval) {
@@ -58,7 +60,7 @@ public class ZController {
                 if (CollisionHandler.detectCollision(zProjectile, ship)) {
                     ship.hit();
                     zProjectile = null;
-                } 
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
 package Utilities;
+
 import java.awt.*;
 import javax.swing.*;
 
@@ -34,13 +35,13 @@ public class CreateJComponents {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 startButton.setBackground(new Color(0, 102, 0));
-                startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));  
+                startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
                 startButton.setBackground(new Color(0, 204, 0));
-                startButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));  
+                startButton.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             }
         });
 

@@ -1,4 +1,5 @@
 package Utilities;
+
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
@@ -64,7 +65,7 @@ public class ImageLoader {
         this.squidImgs.add(squidA);
         this.squidImgs.add(squidB);
         this.squidImgs.add(alienExplosion);
-        
+
         this.octopusImgs = new ArrayList<Image>();
         this.octopusImgs.add(octopusA);
         this.octopusImgs.add(octopusB);
@@ -72,5 +73,5 @@ public class ImageLoader {
 
         this.ufoImgs = new ArrayList<Image>();
         this.ufoImgs.add(ufoImg);
-    } 
+    }
 }

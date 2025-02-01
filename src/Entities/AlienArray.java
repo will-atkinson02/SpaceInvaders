@@ -1,7 +1,9 @@
 package Entities;
+
 import java.awt.*;
 import java.util.*;
 
+import Controllers.UFOController;
 import GameState.GameState;
 
 public class AlienArray {
@@ -30,7 +32,7 @@ public class AlienArray {
 
     public AlienArray() {
         this.alienArray = new ArrayList<Alien>();
-        this.alienRows = 5;
+        this.alienRows = 5; 
         this.alienCols = 11;
 
         this.alienVelocityX = 8;
@@ -51,19 +53,24 @@ public class AlienArray {
         this.explosionTimer = 0;
     }
 
-    public void createAliens(GameState gs, ArrayList<Image> squidImgs, ArrayList<Image> crabImgs, ArrayList<Image> octopusImgs) {
+    public void createAliens(GameState gs, ArrayList<Image> squidImgs, ArrayList<Image> crabImgs,
+            ArrayList<Image> octopusImgs) {
         for (int row = 0; row < this.alienRows; row++) {
             for (int col = 0; col < this.alienCols; col++) {
                 ArrayList<Image> imgSet;
                 double paddingRatio;
-                int points; 
+                int points;
+
+                int yLevelOffset = gs.level;
+                if (gs.level > 5) {
+                    yLevelOffset = 5;
+                }
 
                 if (row < 1) {
                     imgSet = squidImgs;
                     paddingRatio = 0.5;
                     points = 30;
-                }
-                else if (row < 3) {
+                } else if (row < 3) {
                     imgSet = crabImgs;
                     paddingRatio = 0.3125;
                     points = 20;
@@ -73,7 +80,7 @@ public class AlienArray {
                     points = 10;
                 }
 
-                Alien alien = new Alien(gs, col, row, imgSet, paddingRatio, points);
+                Alien alien = new Alien(gs, col, row + yLevelOffset, imgSet, paddingRatio, points);
 
                 this.alienArray.add(alien);
             }
@@ -81,15 +88,15 @@ public class AlienArray {
         this.alienCount = alienArray.size();
     }
 
-    public void alienMovement(GameState gs, Ship ship, UFO ufo) {
+    public void alienMovement(GameState gs, Ship ship, UFOController ufoController) {
         this.alienStepTimer++;
         if (alienStepTimer >= alienStepRate && !ship.shipHit) {
             if (!wallCollison) {
-                checkWallCollision(gs.tileSize*2, gs.boardWidth);
-            } 
+                checkWallCollision(gs.tileSize * 2, gs.boardWidth);
+            }
 
             if (!allowMove) {
-                moveVertically(gs.tileSize, ship, ufo);
+                moveVertically(gs.tileSize, ship, ufoController);
                 allowMove = true;
             } else {
                 moveHorizontally();
@@ -105,7 +112,7 @@ public class AlienArray {
         for (int i = 0; i < alienArray.size(); i++) {
             Alien alien = alienArray.get(i);
             if (alien.alive) {
-                //check if aliens are touching walls
+                // check if aliens are touching walls
                 if (alien.x + alienWidth == boardWidth || alien.x == 0) {
                     wallCollison = true;
                     allowMove = false;
@@ -120,14 +127,13 @@ public class AlienArray {
         for (int i = 0; i < alienArray.size(); i++) {
             Alien alien = alienArray.get(i);
             if (alien.alive) {
-                alien.x += this.alienVelocityX;  
+                alien.x += this.alienVelocityX;
             }
         }
     }
 
-    public void moveVertically(int tileSize, Ship ship, UFO ufo) {
+    public void moveVertically(int tileSize, Ship ship, UFOController ufoController) {
         this.alienVelocityX *= -1;
-
         for (int i = 0; i < alienArray.size(); i++) {
             Alien alien = alienArray.get(i);
             if (alien.alive) {
@@ -135,8 +141,8 @@ public class AlienArray {
                     aliensWin(ship.shipHit, ship.shipSpriteState, ship.lives);
                 } else {
                     alien.y += tileSize;
-                    if (alien.y >= tileSize*6 && !ufo.allowSpawn) {
-                        ufo.allowSpawn = true;
+                    if (alien.y >= tileSize * 6 && !ufoController.allowSpawn) {
+                        ufoController.allowSpawn = true;
                     }
                 }
             }
@@ -146,7 +152,7 @@ public class AlienArray {
     public void updateAlienSprite() {
         this.alienSpriteState = (this.alienSpriteState == 0) ? 1 : 0;
     }
-    
+
     public void aliensWin(boolean shipHit, int shipSpriteState, int lives) {
         alienArray.clear();
         shipHit = true;
