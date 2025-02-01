@@ -23,10 +23,10 @@ public class UFOController {
     public UFO spawnUFO(GameState gs, ArrayList<Image> ufoImages, double randomNumber) {
         int x;
         int velocityX;
-        if (randomNumber > 0.8) {
+        if (randomNumber > 0.85) {
             x = gs.boardWidth;
             velocityX = -4;
-        } else if (randomNumber < 0.2) {
+        } else if (randomNumber < 0.15) {
             x = -gs.tileSize * 2;
             velocityX = 4;
         } else {
@@ -66,7 +66,7 @@ public class UFOController {
             this.spawnTimer++;
             if (this.spawnTimer == 160) {
                 double randomNumber = Math.random();
-                if ((randomNumber > 0.8 || randomNumber < 0.2) && this.allowSpawn) {
+                if ((randomNumber > 0.85 || randomNumber < 0.15) && this.allowSpawn) {
                     this.ufo = spawnUFO(gs, ufoImages, randomNumber);
                 }
                 this.spawnTimer = 0;
