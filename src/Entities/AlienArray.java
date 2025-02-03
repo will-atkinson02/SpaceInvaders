@@ -5,6 +5,7 @@ import java.util.*;
 
 import Controllers.UFOController;
 import GameState.GameState;
+import Utilities.SoundPlayer;
 
 public class AlienArray {
     public ArrayList<Alien> alienArray;
@@ -18,6 +19,7 @@ public class AlienArray {
 
     public int alienStepTimer;
     public int alienStepRate;
+    public int note;
 
     public int alienSpriteTimer = 0;
     public int alienSpriteState = 0;
@@ -39,6 +41,7 @@ public class AlienArray {
 
         this.alienStepRate = 24;
         this.alienStepTimer = 0;
+        this.note = 4;
 
         this.alienSpriteTimer = 0;
         this.alienSpriteState = 0;
@@ -91,12 +94,19 @@ public class AlienArray {
     public void alienMovement(GameState gs, Ship ship, UFOController ufoController) {
         this.alienStepTimer++;
         if (alienStepTimer >= alienStepRate && !ship.shipHit) {
+            SoundPlayer.playSound("../assets/sounds/note" + Integer.toString(this.note) + ".wav");
+            if (this.note == 4) {
+                this.note = 1;
+            } else {
+                this.note += 1;
+            }
+            
             if (!wallCollison) {
                 checkWallCollision(gs.tileSize * 2, gs.boardWidth);
             }
 
             if (!allowMove) {
-                moveVertically(gs.tileSize, ship, ufoController);
+                moveVertically(gs, ship, ufoController);
                 allowMove = true;
             } else {
                 moveHorizontally();
@@ -132,16 +142,16 @@ public class AlienArray {
         }
     }
 
-    public void moveVertically(int tileSize, Ship ship, UFOController ufoController) {
+    public void moveVertically(GameState gs, Ship ship, UFOController ufoController) {
         this.alienVelocityX *= -1;
         for (int i = 0; i < alienArray.size(); i++) {
             Alien alien = alienArray.get(i);
             if (alien.alive) {
-                if (alien.y + tileSize == ship.y) {
-                    aliensWin(ship.shipHit, ship.shipSpriteState, ship.lives);
+                if (alien.y + gs.tileSize >= ship.y) {
+                    aliensWin(gs, ship);
                 } else {
-                    alien.y += tileSize;
-                    if (alien.y >= tileSize * 6 && !ufoController.allowSpawn) {
+                    alien.y += gs.tileSize;
+                    if (alien.y >= gs.tileSize * 6 && !ufoController.allowSpawn) {
                         ufoController.allowSpawn = true;
                     }
                 }
@@ -153,11 +163,12 @@ public class AlienArray {
         this.alienSpriteState = (this.alienSpriteState == 0) ? 1 : 0;
     }
 
-    public void aliensWin(boolean shipHit, int shipSpriteState, int lives) {
+    public void aliensWin(GameState gs, Ship ship) {
+        gs.gameOver = true;
         alienArray.clear();
-        shipHit = true;
-        shipSpriteState = 1;
-        lives = 0;
+        ship.shipHit = true;
+        ship.shipSpriteState = 1;
+        ship.lives = 0;
     }
 
     public void countAliveSquids() {

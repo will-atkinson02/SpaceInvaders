@@ -1,6 +1,6 @@
 // TODO
 // add sound effects and music
-// BONUS add green shield things, alien bullet collisions with floor
+// BONUS add green shield things
 // stretch change bulletArray to a linked list
 
 import java.awt.*;
@@ -114,6 +114,7 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
         } else {
             removeModalOverlay(this.playAgainOverlay);
             restartGame();
+            
         }
     }
 
@@ -234,8 +235,8 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
         ufoController = new UFOController();
 
+        gs.reset();
         gameLoop.start();
-        gs.gameOver = false;
     }
 
     @Override

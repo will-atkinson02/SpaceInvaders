@@ -28,4 +28,10 @@ public class GameState {
         this.level += 1;
         this.score += this.level * 200;
     }
+
+    public void reset() {
+        this.score = 0;
+        this.level = 0;
+        this.gameOver = false;
+    }
 }
