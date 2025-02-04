@@ -1,8 +1,3 @@
-// TODO
-// add sound effects and music
-// BONUS add green shield things
-// stretch change bulletArray to a linked list
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Random;
