@@ -30,6 +30,9 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
     JPanel playAgainOverlay;
 
     Timer gameLoop;
+    long lastTime = System.nanoTime();
+    double TARGET_FPS = 60.0;
+    double NANOSECONDS_IN_SECOND = 1000000000.0;
 
     HighScore highScoreManager = new HighScore();
     int highscore = highScoreManager.readHighScore();
@@ -65,6 +68,14 @@ public class SpaceInvaders extends JPanel implements ActionListener, KeyListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        long currentTime = System.nanoTime();
+        double deltaTime = (currentTime - lastTime) / NANOSECONDS_IN_SECOND;  // Time in seconds
+        lastTime = currentTime;
+
+        updateGame(deltaTime);
+    }
+
+    public void updateGame(double deltaTime) {
         alienArray.alienExplosionTimer();
         alienArray.countAliveSquids();
         handleAlienProjectiles();

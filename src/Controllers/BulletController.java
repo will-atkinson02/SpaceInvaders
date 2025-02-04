@@ -4,12 +4,15 @@ import java.util.ArrayList;
 
 import Entities.*;
 import GameState.GameState;
+import Utilities.SoundPlayer;
 
 public class BulletController {
     public ArrayList<Bullet> bulletArray;
+    public boolean playUFOHitSFX;
 
     public BulletController() {
         this.bulletArray = new ArrayList<Bullet>();
+        this.playUFOHitSFX = true;
     }
 
     public void handleMovement(GameState gs, AlienArray alienArray, Ship ship, UFO ufo) {
@@ -21,6 +24,8 @@ public class BulletController {
             for (int j = 0; j < alienArray.alienArray.size(); j++) {
                 Alien alien = alienArray.alienArray.get(j);
                 if (!bullet.used && alien.alive && CollisionHandler.detectCollision(bullet, alien)) {
+                    SoundPlayer.playSound("../assets/sounds/alien-explosion.wav");
+
                     ship.reloadTime = 60;
                     alienArray.explodedAlienIndex = j;
                     bullet.used = true;
@@ -32,6 +37,12 @@ public class BulletController {
 
             // bullet collision with ufo
             if (ufo != null && CollisionHandler.detectCollision(bullet, ufo)) {
+                SoundPlayer.stopSound("../assets/sounds/ufo-moving.wav");
+                if (ufo.playUFOHitSFX) {
+                    SoundPlayer.playSound("../assets/sounds/ufo-explosion.wav");
+                    ufo.playUFOHitSFX = false;
+                }
+
                 bullet.used = true;
                 ship.reloadTime = 60;
                 gs.score += UFO.points();

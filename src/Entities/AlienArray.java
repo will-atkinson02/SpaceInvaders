@@ -94,6 +94,8 @@ public class AlienArray {
     public void alienMovement(GameState gs, Ship ship, UFOController ufoController) {
         this.alienStepTimer++;
         if (alienStepTimer >= alienStepRate && !ship.shipHit) {
+
+            
             SoundPlayer.playSound("../assets/sounds/note" + Integer.toString(this.note) + ".wav");
             if (this.note == 4) {
                 this.note = 1;

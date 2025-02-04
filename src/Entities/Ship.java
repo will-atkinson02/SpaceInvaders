@@ -18,6 +18,7 @@ public class Ship extends Entity {
     public boolean movingLeft;
     public boolean movingRight;
     public int reloadTime;
+    public boolean playShipHitSFX;
 
     public Ship(GameState gs, ArrayList<Image> imageArray) {
         super(
@@ -32,6 +33,7 @@ public class Ship extends Entity {
         this.shipSpriteTimer = 0;
         this.shipHit = false;
         this.reloadTime = 60;
+        this.playShipHitSFX = false;
     }
 
     public void allowShipControl(int boardWidth) {
@@ -45,11 +47,15 @@ public class Ship extends Entity {
     public void hit() {
         this.lives -= 1;
         this.shipHit = true;
+        this.playShipHitSFX = true;
     }
 
     public void handleShipHit(GameState gs, AlienArray alienArray, TController tController, ZController zController) {
         if (this.shipHit) {
-            SoundPlayer.playSound("../assets/sounds/shipExplosion.wav");
+            if (this.playShipHitSFX) {
+                SoundPlayer.playSound("../assets/sounds/ship-explosion.wav");
+                this.playShipHitSFX = false;
+            }
 
             zController.allowSpawn = false;
             tController.allowSpawn = false;

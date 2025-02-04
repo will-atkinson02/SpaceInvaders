@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import Entities.UFO;
 import GameState.GameState;
+import Utilities.SoundPlayer;
 
 public class UFOController {
     public UFO ufo;
@@ -68,13 +69,14 @@ public class UFOController {
                 double randomNumber = Math.random();
                 if ((randomNumber > 0.85 || randomNumber < 0.15) && this.allowSpawn) {
                     this.ufo = spawnUFO(gs, ufoImages, randomNumber);
+                    SoundPlayer.playLoop("../assets/sounds/ufo-moving.wav");
                 }
                 this.spawnTimer = 0;
             }
         } else {
             moveHorizontally();
-
             if (outOfBounds(gs)) {
+                SoundPlayer.stopSound("../assets/sounds/ufo-moving.wav");
                 ufo = null;
             } else {
                 checkHit();
